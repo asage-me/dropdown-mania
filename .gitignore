@@ -32,3 +32,6 @@ npm-debug.log*
 secrets/
 *.pem
 *.key
+
+# Tool caches
+.fallow/
