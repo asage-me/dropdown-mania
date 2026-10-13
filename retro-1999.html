@@ -1,173 +1,123 @@
-<div class="retro-container">
-    <header class="retro-header">
-        <div class="retro-marquee">
-            <span class="retro-marquee-content">🔥 WELCOME TO THE BEST DROP DOWN SITE ON THE WEB! 🔥 CREATED IN 1999 & UPDATED FOR MODERN BROWSERS! 🔥</span>
-        </div>
-    </header>
+<!-- ============================================================
+     WING III — RETRO 1999
+     A preserved exhibit, not a joke: loud, but scoped to this wing and
+     built from divs/sections so it never nests a second <main> inside
+     the page's <main> the way the original did.
+     ============================================================ -->
 
-    <nav class="retro-nav" role="navigation" aria-label="Retro navigation">
-        <a href="#home">🏠 Home</a> |
-        <a href="#dropdowns">📂 Dropdowns</a> |
-        <a href="#games">🎮 Games</a> |
-        <a href="#guestbook">📝 Sign Guestbook</a>
+<div class="retro-page">
+
+    <div class="retro-marquee" role="presentation">
+        <span class="retro-marquee__track">★ WELCOME TO THE BEST DROP DOWN SITE ON THE WHOLE WEB ★ HAND CODED IN NOTEPAD ★ NOW WITH 3 WHOLE DROPDOWNS ★ SIGN THE GUESTBOOK ★</span>
+    </div>
+
+    <nav class="retro-nav" aria-label="Retro navigation">
+        <a href="#/retro">🏠 HOME</a>
+        <span aria-hidden="true">|</span>
+        <a href="#/retro/dd-015">📂 DROPDOWNS</a>
+        <span aria-hidden="true">|</span>
+        <a href="#/games">🎮 REAL GAMES</a>
+        <span aria-hidden="true">|</span>
+        <a href="#/retro/dd-016">📝 GUESTBOOK</a>
     </nav>
 
-    <main class="retro-content" id="home">
+    <div class="retro-badge" aria-hidden="true">
+        <span>BEST VIEWED IN</span><strong>NETSCAPE NAVIGATOR 4.0</strong><span>AT 800×600</span>
+    </div>
+
+    <section class="retro-block" id="retro-home">
+        <h2 class="retro-h">WELCOME, VISITOR!!!</h2>
+        <p class="retro-p">You have found the third wing of The Dropdown Archive: the room we kept
+            exactly as we found it. Everything below is period-correct — including the parts modern
+            practice tells you not to do.</p>
+        <p class="retro-blink" aria-live="off">▶ THIS SITE IS ALWAYS UNDER CONSTRUCTION ◀</p>
+    </section>
+
+    <!-- ==================== DD-015 ==================== -->
+    <section class="retro-block" id="dd-015" data-exhibit="demo" data-accession="DD-015" data-title="Three selects, 1999" data-route="/retro/dd-015">
+        <h3 class="retro-h3">📂 THE THREE SACRED DROPDOWNS</h3>
         <div class="retro-grid">
-            <!-- Retro Dropdown Demo 1 -->
             <div class="retro-card">
-                <h3 class="retro-heading">DROP DOWN #1</h3>
-                <select title="Choose a fruit" aria-label="Choose a fruit">
-                    <option value="">-- Choose One --</option>
-                    <option value="apple">Apple</option>
-                    <option value="banana">Banana</option>
-                    <option value="cherry">Cherry</option>
+                <label class="retro-label" for="retro-fruit">CHOOSE A FRUIT</label>
+                <select id="retro-fruit" data-select-variant="sel--retro">
+                    <option value="">-- PICK ONE --</option>
+                    <option value="apple">APPLE</option>
+                    <option value="banana">BANANA</option>
+                    <option value="cherry">CHERRY</option>
                 </select>
             </div>
-
-            <!-- Retro Dropdown Demo 2 -->
             <div class="retro-card">
-                <h3 class="retro-heading">DROP DOWN #2</h3>
-                <select title="Pick a fruit" aria-label="Pick a fruit">
-                    <option value="">-- Pick a Fruit --</option>
-                    <option value="grape">Grape</option>
-                    <option value="orange">Orange</option>
-                    <option value="melon">Watermelon</option>
+                <label class="retro-label" for="retro-browser">YOUR BROWSER</label>
+                <select id="retro-browser" data-select-variant="sel--retro">
+                    <option value="">-- SELECT --</option>
+                    <option value="ns">NETSCAPE 4</option>
+                    <option value="ie">INTERNET EXPLORER 5</option>
+                    <option value="lynx">LYNX (respect)</option>
                 </select>
             </div>
-
-            <!-- Retro Dropdown Demo 3 -->
             <div class="retro-card">
-                <h3 class="retro-heading">DROP DOWN #3</h3>
-                <select title="Select item" aria-label="Select item">
-                    <option value="">-- Select Item --</option>
-                    <option value="one">One</option>
-                    <option value="two">Two</option>
-                    <option value="three">Three</option>
+                <label class="retro-label" for="retro-ring">WEBRING</label>
+                <select id="retro-ring" data-select-variant="sel--retro" data-retro-ring>
+                    <option value="">-- NEXT SITE --</option>
+                    <option value="x">THIS SITE (YOU ARE HERE)</option>
+                    <option value="y">A SITE THAT 404'd IN 2004</option>
+                    <option value="z">MY COUSIN'S PAGE</option>
                 </select>
-            </div>
-
-            <!-- Retro Game Box -->
-            <div class="retro-card" id="games">
-                <h3 class="retro-heading">🎮 PLAY GAMES!</h3>
-                <p class="retro-blink">CLICK HERE TO CHALLENGE YOURSELF!</p>
-                <a href="#" class="btn retro-btn-primary" data-switch-to-games>START PLAYING</a>
-            </div>
-
-            <!-- Retro Stats -->
-            <div class="retro-hit-counter">
-                <p>VISITOR COUNT:</p>
-                <span id="visitor-count" class="retro-counter" aria-live="polite">00001337</span>
-            </div>
-
-            <!-- Retro Quote -->
-            <div class="retro-card">
-                <blockquote>
-                    "Drop downs are the future of web navigation!"<br>
-                    <cite>— Unknown Webmaster, 1999</cite>
-                </blockquote>
             </div>
         </div>
+        <p class="retro-out" data-retro-out aria-live="polite">Nothing chosen. The web waits for you.</p>
+    </section>
 
-        <hr class="retro-hr">
+    <!-- ==================== DD-017 ==================== -->
+    <section class="retro-block" id="dd-017" data-exhibit="demo" data-accession="DD-017" data-title="Hit counter and marquee" data-route="/retro/dd-017">
+        <h3 class="retro-h3">🔢 THE HIT COUNTER NEVER LIES</h3>
+        <div class="retro-counter" data-retro-counter role="group" aria-label="Visitor counter">
+            <span class="retro-counter__digit" data-digit>0</span>
+            <span class="retro-counter__digit" data-digit>0</span>
+            <span class="retro-counter__digit" data-digit>1</span>
+            <span class="retro-counter__digit" data-digit>3</span>
+            <span class="retro-counter__digit" data-digit>3</span>
+            <span class="retro-counter__digit" data-digit>7</span>
+        </div>
+        <p class="retro-p retro-p--small">You are visitor number <strong data-retro-total>1337</strong>.
+            The counter is stored in this browser, which is the only honest way to do a hit counter
+            in 1999 technology.</p>
+        <div class="retro-awards" aria-label="Awards">
+            <span class="retro-award">🏆 COOLEST SITE</span>
+            <span class="retro-award">🥇 3 STARS</span>
+            <span class="retro-award">📟 HTML 3.2 APPROVED</span>
+        </div>
+    </section>
 
-        <!-- Guestbook Section -->
-        <section id="guestbook" class="retro-card">
-            <h3>📝 SIGN OUR GUESTBOOK</h3>
-            <form id="guestbook-form" novalidate>
-                <div class="form-group">
-                    <label for="guest-name">Name:</label><br>
-                    <input type="text" id="guest-name" placeholder="Your name here..." required aria-required="true">
-                </div>
-                <div class="form-group">
-                    <label for="guest-message">Message:</label><br>
-                    <textarea id="guest-message" rows="4" placeholder="Write your message..." required aria-required="true"></textarea>
-                </div>
-                <button type="submit" class="btn retro-btn-success">SUBMIT MESSAGE</button>
-            </form>
-        </section>
+    <!-- ==================== DD-016 ==================== -->
+    <section class="retro-block" id="dd-016" data-exhibit="demo" data-accession="DD-016" data-title="Guestbook" data-route="/retro/dd-016">
+        <h3 class="retro-h3">📝 SIGN THE GUESTBOOK</h3>
+        <form class="retro-form" data-retro-form novalidate>
+            <div class="retro-field">
+                <label class="retro-label" for="guest-name">YOUR NAME</label>
+                <input class="retro-input" id="guest-name" name="name" type="text" maxlength="40"
+                       placeholder="webmaster" autocomplete="off" required>
+            </div>
+            <div class="retro-field">
+                <label class="retro-label" for="guest-message">YOUR MESSAGE</label>
+                <textarea class="retro-input retro-input--area" id="guest-message" name="message" rows="3"
+                          maxlength="240" placeholder="cool site!! add me to your webring" required></textarea>
+            </div>
+            <button type="submit" class="retro-submit">SUBMIT ▶</button>
+            <p class="retro-formout" data-retro-formout role="status" aria-live="polite"></p>
+        </form>
 
-        <hr class="retro-hr">
-    </main>
+        <ul class="guestbook" data-retro-entries></ul>
+    </section>
 
-    <footer class="retro-footer">
-        <p>© 1999 - 2026 Dropdown Mania - Best viewed in Internet Explorer 5.0+ with resolution 800x600</p>
-        <p class="retro-footer-links">
-            [<a href="#home">Home</a>] | 
-            [<a href="mailto:webmaster@dropdownmania.example.com">Email Us</a>] | 
-            [<a href="#top">Top</a>]
+    <div class="retro-foot">
+        <p>© 1999–2026 THE DROPDOWN ARCHIVE · NO FRAMES · NO FRAMES · NO FRAMES</p>
+        <p class="retro-foot__links">
+            <a href="#/">Back to the reading room</a>
+            <span aria-hidden="true">|</span>
+            <a href="#/education">Wing I</a>
+            <span aria-hidden="true">|</span>
+            <a href="#/games">Wing II</a>
         </p>
-    </footer>
+    </div>
 </div>
-
-<style>
-.retro-nav a {
-    color: white;
-}
-
-.retro-counter {
-    font-size: 24px;
-}
-
-.retro-btn-primary {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: red;
-    color: white;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-}
-
-.retro-btn-success {
-    background-color: green;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-}
-
-.retro-hr {
-    border: 3px double red;
-    margin: 20px 0;
-}
-
-.form-group {
-    margin-bottom: 10px;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 300px;
-    padding: 5px;
-}
-
-.retro-footer-links a {
-    color: #ffff00;
-}
-</style>
-
-<script>
-(function() {
-    'use strict';
-
-    // Switch to games mode
-    var gamesLink = document.querySelector('[data-switch-to-games]');
-    if (gamesLink) {
-        gamesLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('main-mode-select').value = 'games';
-            dropdownMania.loadMode('retro');
-        });
-    }
-
-    // Guestbook form submission
-    var guestbookForm = document.getElementById('guestbook-form');
-    if (guestbookForm) {
-        guestbookForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('🎉 THANK YOU FOR SIGNING OUR GUESTBOOK! YOUR MESSAGE HAS BEEN RECORDED!');
-        });
-    }
-})();
-</script>

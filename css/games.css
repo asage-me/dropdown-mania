@@ -1,239 +1,438 @@
-/* ============================================
-   GAMES PAGE — Archive Exhibition Catalog
-   Games are presented as "exhibits" in the archive.
-   Selector is a navigation breadcrumb, not tabs.
-   ============================================ */
+/* ============================================================
+   WING II — GAMES
+   ============================================================ */
 
-.game-selector {
-    display: flex;
-    justify-content: center;
-    gap: 0;
-    margin-bottom: 40px;
-    border-bottom: 1px solid var(--archive-warm);
-    padding-bottom: 0;
+.game {
+	max-width: var(--page-max);
+	margin-inline: auto;
+	padding: clamp(30px, 5vw, 48px) var(--gutter);
+	scroll-margin-top: calc(var(--nav-height) + 16px);
 }
 
-.game-section { display: none; }
-.game-section.active { display: block; }
-
-.game-btn {
-    font-family: var(--meta-font);
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 12px 24px;
-    border-radius: 0;
-    border: none;
-    background-color: transparent;
-    color: var(--meta-color);
-    cursor: pointer;
-    transition: var(--transition-fast);
-    position: relative;
-    font-weight: 500;
+.game__head {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: clamp(18px, 3vw, 40px);
+	align-items: start;
+	padding-bottom: 22px;
+	border-bottom: 1px solid var(--border);
 }
 
-.game-btn.active {
-    color: var(--archive-blue);
+.game__head h3 {
+	font-size: clamp(1.5rem, 3vw, 2rem);
+	font-stretch: 112%;
+	margin-bottom: 8px;
 }
 
-.game-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 24px;
-    right: 24px;
-    height: 2px;
-    background-color: var(--archive-blue);
+.game__head p { font-size: 1rem; }
+
+.statline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1px;
+	background: var(--border);
+	border: 1px solid var(--border);
 }
 
-.game-btn:hover:not(.active) {
-    color: var(--text-color);
-    background-color: transparent;
+.statline > div {
+	min-width: 84px;
+	padding: 10px 14px;
+	background: var(--panel);
 }
 
-/* Hacker UI — archival terminal aesthetic */
-.hacker-ui {
-    text-align: center;
-    padding: 40px;
-    background-color: var(--hacker-bg);
-    color: var(--hacker-text);
-    border-radius: 0;
-    box-shadow: var(--hacker-shadow);
-    font-family: 'Courier New', Courier, monospace;
+.statline dt {
+	font-family: var(--font-mono);
+	font-size: 0.58rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-faint);
 }
 
-.hacker-ui label { 
-    display: block; 
-    margin-bottom: 1rem; 
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+.statline dd {
+	font-family: var(--font-display);
+	font-size: 1.35rem;
+	font-weight: 800;
+	font-stretch: 112%;
+	letter-spacing: -0.02em;
+	color: var(--accent);
 }
 
-.hacker-ui input {
-    padding: 12px;
-    font-size: 1rem;
-    border-radius: 0;
-    text-align: center;
-    width: 300px;
-    background-color: var(--hacker-input-bg);
-    border: 1px solid var(--hacker-input-border);
-    color: var(--hacker-text);
-    font-family: 'Courier New', Courier, monospace;
+.game__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 22px 0 14px;
 }
 
-.hacker-ui input:focus {
-    outline: none;
-    box-shadow: 0 0 10px var(--hacker-input-border);
+.switch {
+	display: inline-flex;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius);
+	overflow: hidden;
 }
 
-.idle-game-stats {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-bottom: 30px;
-    background-color: var(--info-bg);
-    padding: 20px;
-    border-radius: 0;
+.switch__opt {
+	padding: 9px 15px;
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+	background: transparent;
+	border: 0;
+	cursor: pointer;
 }
 
-.score-display { 
-    font-family: var(--meta-font);
-    font-size: 1.8rem; 
-    font-weight: 700; 
-    color: var(--archive-blue); 
+.switch__opt + .switch__opt { border-left: 1px solid var(--border); }
+
+.switch__opt:hover { color: var(--text); }
+
+.switch__opt.is-on {
+	background: var(--accent);
+	color: var(--accent-ink);
 }
 
-.stats-display { 
-    font-family: var(--meta-font);
-    font-size: 0.8rem; 
-    color: var(--text-light);
-    background: transparent;
-    padding: 4px 12px;
-    border-radius: 0;
-    border-left: 2px solid var(--archive-warm);
+.game__note {
+	font-family: var(--font-mono);
+	font-size: 0.76rem;
+	line-height: 1.6;
+	color: var(--text-muted);
+	padding: 10px 14px;
+	background: var(--surface-sunken);
+	border-left: 2px solid var(--accent);
 }
 
-.main-dropdown-container {
-    text-align: center;
-    padding: 30px;
+/* ---------- DD-012 Find the Path ---------- */
+.path {
+	display: grid;
+	gap: 14px;
+	margin-top: 24px;
 }
 
-.upgrades-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+.path__level {
+	display: grid;
+	grid-template-columns: 54px minmax(0, 1fr) minmax(0, 260px);
+	gap: clamp(12px, 2vw, 22px);
+	align-items: center;
+	padding: 16px 18px;
+	background: var(--panel);
+	border: 1px solid var(--border);
+	transition: border-color var(--t-med), background-color var(--t-med);
 }
 
-#auth-result {
-    margin-top: 20px;
-    font-weight: bold;
+.path__level.is-solved {
+	border-color: var(--accent);
+	background: var(--accent-soft);
 }
 
-/* Tier-specific sizing - scale the select element and its font size */
-.custom-dropdown {
-    padding: 8px;
-    border-radius: 4px;
-    border: 2px solid #4a90d6;
-    background-color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.path__index {
+	font-family: var(--font-display);
+	font-size: 2rem;
+	font-weight: 800;
+	font-stretch: 118%;
+	line-height: 1;
+	color: var(--border-strong);
 }
 
-[data-theme="dark"] .custom-dropdown {
-    background-color: var(--card-bg);
-    color: var(--text-color);
+.path__level.is-solved .path__index { color: var(--accent); }
+
+.path__prompt {
+	display: block;
+	font-size: 1.04rem;
+	font-weight: 500;
+	color: var(--text);
 }
 
-/* Tier-specific sizing */
-.tier-1 .custom-dropdown { width: 200px; font-size: 16px; }
-.tier-2 .custom-dropdown { width: 150px; font-size: 12px; }
-.tier-3 .custom-dropdown { width: 100px; font-size: 8px; }
-.tier-4 .custom-dropdown { width: 50px; font-size: 4px; }
-
-/* Custom dropdown (div-based) styling */
-.custom-dropdown-wrapper {
-    display: inline-block;
-    margin: 10px;
-    text-align: center;
+.path__verdict {
+	grid-column: 2 / -1;
+	margin: 0;
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.04em;
+	min-height: 1.2em;
 }
 
-.custom-select-display {
-    border: 2px solid #4a90d6;
-    border-radius: 4px;
-    background-color: white;
-    cursor: pointer;
-    -webkit-user-select: none;
-    user-select: none;
-    box-sizing: border-box;
+.path__verdict.is-right { color: var(--patina); }
+.path__verdict.is-wrong { color: var(--rubric); }
+
+.path__notes {
+	margin-top: 8px;
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.03em;
+	color: var(--text-faint);
 }
 
-.custom-select-display:hover {
-    background-color: #f0f0f0;
+/* Advanced mode: the menus drift. Motion is opt-in via the difficulty switch
+   and never applied under prefers-reduced-motion (handled in JS). */
+.path.is-moving .path__level {
+	animation: drift var(--drift-duration, 4s) ease-in-out infinite alternate;
+	will-change: transform;
 }
 
-[data-theme="dark"] .custom-select-display {
-    background-color: var(--card-bg);
-    color: var(--text-color);
+@keyframes drift {
+	from { transform: translate3d(0, 0, 0); }
+	to   { transform: translate3d(var(--drift-x, 12px), var(--drift-y, -8px), 0); }
 }
 
-[data-theme="dark"] .custom-select-display:hover {
-    background-color: var(--card-hover-bg);
+.result {
+	margin-top: 26px;
+	padding: 22px 24px;
+	background: var(--panel);
+	border: 1px solid var(--accent);
+	border-left-width: 4px;
 }
 
-.custom-options-list {
-    border: 2px solid #4a90d6;
-    border-radius: 4px;
-    background-color: white;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    box-sizing: border-box;
+.result__time {
+	font-family: var(--font-display);
+	font-size: 1.6rem;
+	font-weight: 800;
+	font-stretch: 112%;
+	letter-spacing: -0.02em;
+	color: var(--accent);
+	margin-bottom: 6px;
 }
 
-.custom-option-item {
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    box-sizing: border-box;
-    color: inherit;
+.result__meta { font-size: 0.95rem; }
+
+.result__rules {
+	list-style: none;
+	margin-top: 14px;
+	display: grid;
+	gap: 6px;
 }
 
-.custom-option-item:last-child {
-    border-bottom: none;
+.result__rules li {
+	font-size: 0.92rem;
+	color: var(--text-muted);
+	padding-left: 16px;
+	position: relative;
 }
 
-.custom-option-item:hover {
-    background-color: #e8f4fc;
+.result__rules li::before {
+	content: "—";
+	position: absolute;
+	left: 0;
+	color: var(--accent);
 }
 
-[data-theme="dark"] .custom-options-list {
-    background-color: var(--card-bg);
+/* ---------- DD-013 Hacker ---------- */
+.terminal {
+	margin: 24px 0 18px;
+	padding: 18px 20px;
+	background: var(--surface-sunken);
+	border: 1px solid var(--border-strong);
+	border-left: 3px solid var(--patina);
 }
 
-[data-theme="dark"] .custom-option-item {
-    border-bottom-color: #3A3A3A;
-    color: var(--text-color);
+.terminal__line {
+	margin: 0 0 6px;
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	line-height: 1.6;
+	color: var(--patina);
 }
 
-[data-theme="dark"] .custom-option-item:hover {
-    background-color: var(--card-hover-bg);
+.terminal__line--dim { color: var(--text-faint); }
+
+.terminal__line--hint { color: var(--accent); }
+
+.terminal.is-open { border-left-color: var(--accent); }
+
+/* DD-013 · fragment 4 of 4. Never rendered on screen — it exists only in the
+   Styles pane, which is exactly where the puzzle wants you to look. */
+[data-hk-terminal] { --hk-fragment: "51GN"; }
+
+.clues {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 1px;
+	margin: 0 0 22px;
+	list-style: none;
+	background: var(--border);
+	border: 1px solid var(--border);
 }
 
-/* Tier movement for tier 5+ */
-.tier-move {
-    animation: moveTier5 3s infinite ease-in-out;
-    font-size: 16px;
+.clue {
+	display: grid;
+	grid-template-columns: 18px 1fr auto;
+	align-items: center;
+	gap: 10px;
+	padding: 11px 14px;
+	background: var(--panel);
 }
 
-@keyframes moveTier5 {
-    0% { transform: translateX(0); }
-    49% { transform: translateX(120px); }
-    51% { transform: translateX(120px); }
-    100% { transform: translateX(0); }
+.clue__mark {
+	width: 12px;
+	height: 12px;
+	border: 1px solid var(--border-strong);
 }
 
-/* Lazy Drop game section titles */
-.lazy-game-title {
-    margin-top: 20px;
+.clue__name { font-size: 0.92rem; }
+
+.clue__state {
+	font-family: var(--font-mono);
+	font-size: 0.6rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.clue.is-found .clue__mark { background: var(--accent); border-color: var(--accent); }
+.clue.is-found .clue__state { color: var(--accent); }
+
+.auth {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 12px;
+	align-items: end;
+	max-width: 560px;
+}
+
+.auth__label {
+	grid-column: 1 / -1;
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.auth__input {
+	padding: 12px 14px;
+	font-family: var(--font-mono);
+	font-size: 0.92rem;
+	letter-spacing: 0.06em;
+	color: var(--text);
+	background: var(--panel-raised);
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius);
+}
+
+.auth__input::placeholder { color: var(--text-faint); letter-spacing: 0; }
+
+.auth__result {
+	min-height: 1.5em;
+	margin: 14px 0;
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	letter-spacing: 0.03em;
+}
+
+.auth__result.is-right { color: var(--patina); }
+.auth__result.is-wrong { color: var(--rubric); }
+.auth__result.is-warn { color: var(--text-muted); }
+
+/* ---------- DD-014 Lazy Drop ---------- */
+.lazy {
+	display: grid;
+	grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+	gap: clamp(20px, 3vw, 40px);
+	margin-top: 26px;
+	align-items: start;
+}
+
+.lazy__board > .label,
+.lazy__side > .label { margin-bottom: 14px; }
+
+.lazy__tiers {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+	align-items: flex-start;
+	padding: 20px;
+	min-height: 180px;
+	background: var(--panel);
+	border: 1px solid var(--border);
+}
+
+.tier {
+	display: grid;
+	gap: 6px;
+	width: calc(var(--tier-scale, 1) * 240px);
+	min-width: 150px;
+}
+
+.tier__label {
+	font-family: var(--font-mono);
+	font-size: 0.62rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.tier .sel__trigger,
+.tier .sel__option {
+	font-size: clamp(0.78rem, calc(0.7rem + var(--tier-scale, 1) * 0.2rem), 0.95rem);
+}
+
+.tier__hint {
+	margin: 0;
+	font-size: 0.76rem;
+	color: var(--text-faint);
+}
+
+.upgrades { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+
+.upgrade {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 2px 14px;
+	padding: 13px 15px;
+	text-align: left;
+	background: var(--panel);
+	border: 0;
+	cursor: pointer;
+	transition: background-color var(--t-fast);
+}
+
+.upgrade:hover:not(:disabled) { background: var(--accent-soft); }
+
+.upgrade:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.upgrade__name {
+	font-family: var(--font-display);
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.upgrade__note { grid-column: 1; font-size: 0.86rem; color: var(--text-faint); }
+
+.upgrade__cost {
+	grid-row: 1 / span 2;
+	align-self: center;
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	color: var(--accent);
+	white-space: nowrap;
+}
+
+.ledger-log {
+	list-style: none;
+	margin: 0 0 16px;
+	padding: 12px 14px;
+	min-height: 110px;
+	background: var(--surface-sunken);
+	border: 1px solid var(--border);
+}
+
+.ledger-log__item {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	line-height: 1.55;
+	color: var(--text-muted);
+	padding: 2px 0;
+}
+
+.ledger-log__item::before { content: "› "; color: var(--accent); }
+
+@media (max-width: 860px) {
+	.game__head { grid-template-columns: 1fr; }
+	.path__level { grid-template-columns: 40px 1fr; }
+	.path__control { grid-column: 2; }
+	.path__verdict { grid-column: 2; }
+	.lazy { grid-template-columns: 1fr; }
+	.auth { grid-template-columns: 1fr; }
 }

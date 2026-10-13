@@ -1,201 +1,131 @@
-<!-- Games section header -->
-<section style="padding: 40px 0 32px;">
-    <span class="meta-label">Collection III — Play</span>
-    <h2 style="margin-top: 12px;">Games built from dropdowns</h2>
-    <p class="narrow-col" style="margin-top: 12px;">Each game here uses dropdown menus as its core mechanic. The interface is the puzzle.</p>
+<!-- ============================================================
+     WING II — GAMES
+     Markup only. Behaviour lives in js/modes/games.js and the three
+     modules under js/games/. No inline <script>, no inline style.
+     ============================================================ -->
+
+<header class="wing-head">
+    <p class="label label--accent">Wing II — Play</p>
+    <h2>Games where the menu is the mechanic</h2>
+    <p>Three exhibits. None of them can be finished by clicking a button — every one of them
+        makes you operate a dropdown, and two of them make you read the page itself.</p>
+</header>
+
+<nav class="exhibit-tabs" aria-label="Games in this wing">
+    <a class="exhibit-tab" href="#/games/find-path" data-game-tab="find-path">
+        <span class="exhibit-tab__accession">DD-012</span> Find the Path
+    </a>
+    <a class="exhibit-tab" href="#/games/hacker" data-game-tab="hacker">
+        <span class="exhibit-tab__accession">DD-013</span> Hacker Puzzle
+    </a>
+    <a class="exhibit-tab" href="#/games/lazy-drop" data-game-tab="lazy-drop">
+        <span class="exhibit-tab__accession">DD-014</span> Lazy Drop
+    </a>
+</nav>
+
+<!-- ==================== DD-012 FIND THE PATH ==================== -->
+<section class="game" id="game-find-path" data-game="find-path" hidden
+         data-exhibit="game" data-accession="DD-012" data-title="Find the Path" data-route="/games/find-path"
+         role="region" aria-labelledby="find-path-h">
+    <div class="game__head">
+        <div>
+            <h3 id="find-path-h">Find the Path</h3>
+            <p>Five dropdowns, one correct sequence, no feedback beyond yes and no. A wrong
+                answer sends you back to level one, so read the labels.</p>
+        </div>
+        <dl class="statline">
+            <div><dt>Attempts</dt><dd data-fp-attempts>0</dd></div>
+            <div><dt>Elapsed</dt><dd data-fp-clock>0:00</dd></div>
+            <div><dt>Best</dt><dd data-fp-best>—</dd></div>
+        </dl>
+    </div>
+
+    <div class="game__toolbar">
+        <div class="switch" role="group" aria-label="Difficulty">
+            <button type="button" class="switch__opt is-on" data-fp-mode="standard" aria-pressed="true">Standard</button>
+            <button type="button" class="switch__opt" data-fp-mode="advanced" aria-pressed="false">Advanced — menus move</button>
+        </div>
+        <button type="button" class="btn btn--sm" data-fp-reset>Restart run</button>
+        <button type="button" class="btn btn--sm" data-fp-hint>Reveal a hint <span data-fp-hint-count>(2)</span></button>
+    </div>
+
+    <p class="game__note" data-fp-status aria-live="polite">Level 1 of 5. In each menu exactly one option breaks the pattern — that is the one that opens the door.</p>
+
+    <div class="path" data-fp-board></div>
+
+    <div class="result" data-fp-result hidden></div>
 </section>
 
-<!-- Game selector — breadcrumb-style tabs -->
-<div class="game-selector">
-    <button class="btn game-btn active" data-game="find-the-path">Find the Path</button>
-    <button class="btn game-btn" data-game="hacker">Hacker Puzzle</button>
-    <button class="btn game-btn" data-game="lazy-drop-down">Lazy Drop Down</button>
-</div>
-
-<div class="game-board">
-    <!-- Find the Path Game -->
-    <section id="game-find-the-path" class="game-section active">
-        <h3 style="font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 8px;">Exhibit A: Find the Path</h3>
-        <p style="font-size: 0.9rem;">Navigate a sequence of hidden choices. Only one option in each dropdown leads forward.</p>
-        
-        <div id="find-path-container" class="path-game-container">
-            <div class="info-box">
-                <p><strong>Instructions:</strong> Select the correct options in each dropdown. You need to find the hidden path sequence of 5 correct choices.</p>
-            </div>
-            
-            <div id="path-levels"></div>
+<!-- ==================== DD-013 HACKER PUZZLE ==================== -->
+<section class="game" id="game-hacker" data-game="hacker" hidden
+         data-exhibit="game" data-accession="DD-013" data-title="Hacker Puzzle" data-route="/games/hacker"
+         role="region" aria-labelledby="hacker-h">
+    <div class="game__head">
+        <div>
+            <h3 id="hacker-h">Hacker Puzzle</h3>
+            <p>The credential is already in this page — one fragment in the source, one in a data
+                attribute, one in the console, one in a CSS rule. Open devtools, collect all four,
+                then assemble them in order.</p>
         </div>
-    </section>
+        <dl class="statline">
+            <div><dt>Clues</dt><dd><span data-hk-found>0</span> / 4</dd></div>
+            <div><dt>Attempts</dt><dd data-hk-attempts>0</dd></div>
+        </dl>
+    </div>
 
-    <!-- Hacker Puzzle Game -->
-    <section id="game-hacker" class="game-section">
-        <h3 style="font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 8px;">Exhibit B: Hacker Puzzle</h3>
-        <p style="font-size: 0.9rem;">The password is hidden in this page. Use your developer tools to find it.</p>
-        
-        <!-- Hacker game uses theme variables: dark=Matrix, light=default -->
-        <div id="hacker-container" class="hacker-ui">
-            <div class="info-box" style="background-color: var(--info-bg); border-left-color: var(--hacker-input-border); color: var(--hacker-text); font-family: 'Courier New', Courier, monospace; font-size: 0.85rem;">
-                <p><strong style="color: var(--hacker-text);">System initialized.</strong></p>
-                <p style="color: rgba(0,255,65,0.7); margin-top: 4px;">The password is hidden somewhere in this page. Use your developer tools to find it.</p>
-            </div>
-            
-            <div class="hacker-auth-form" style="margin-top: 28px;">
-                <label for="password-input" style="display: block; margin-bottom: 10px; font-size: 0.85rem; color: var(--hacker-text);">Enter Password:</label>
-                <input type="password" id="password-input" placeholder="Type password here...">
-                <button id="submit-password-btn" class="btn" style="margin-top: 12px; background-color: transparent; border-color: var(--hacker-input-border); color: var(--hacker-text);">Submit</button>
-                <p id="auth-result" style="margin-top: 16px; font-weight: bold;"></p>
-            </div>
+    <div class="terminal" data-hk-terminal data-hk-dom-clue="fragment 2 of 4 :: -M4N-">
+        <p class="terminal__line">$ session opened. operator unknown.</p>
+        <p class="terminal__line">$ four fragments are embedded in this document. recover them, then assemble.</p>
+        <p class="terminal__line terminal__line--dim">tip: view source, then inspect Elements, Console and Styles.</p>
+    </div>
+
+    <ul class="clues" data-hk-clues>
+        <li class="clue" data-clue="source"><span class="clue__mark" aria-hidden="true"></span><span class="clue__name">Source comment</span><span class="clue__state">Not found</span></li>
+        <li class="clue" data-clue="dom"><span class="clue__mark" aria-hidden="true"></span><span class="clue__name">Data attribute</span><span class="clue__state">Not found</span></li>
+        <li class="clue" data-clue="console"><span class="clue__mark" aria-hidden="true"></span><span class="clue__name">Console banner</span><span class="clue__state">Not found</span></li>
+        <li class="clue" data-clue="css"><span class="clue__mark" aria-hidden="true"></span><span class="clue__name">CSS content rule</span><span class="clue__state">Not found</span></li>
+    </ul>
+
+    <!-- fragment 1 of 4 :: 0P3N -->
+    <form class="auth" data-hk-form>
+        <label class="auth__label" for="hk-password">Assemble the credential</label>
+        <input class="auth__input" id="hk-password" type="text" autocomplete="off" spellcheck="false"
+               placeholder="four fragments, in order">
+        <button type="submit" class="btn btn--solid">Authenticate</button>
+    </form>
+    <p class="auth__result" data-hk-result role="status" aria-live="polite"></p>
+    <button type="button" class="btn btn--sm" data-hk-hint>Stuck? Take a hint</button>
+</section>
+
+<!-- ==================== DD-014 LAZY DROP ==================== -->
+<section class="game" id="game-lazy-drop" data-game="lazy-drop" hidden
+         data-exhibit="game" data-accession="DD-014" data-title="Lazy Drop" data-route="/games/lazy-drop"
+         role="region" aria-labelledby="lazy-h">
+    <div class="game__head">
+        <div>
+            <h3 id="lazy-h">Lazy Drop</h3>
+            <p>An idle game measured in selections. Every commit banks points; upgrades make each
+                selection worth more, and higher tiers are smaller, rarer and richer.</p>
         </div>
-    </section>
+        <dl class="statline">
+            <div><dt>Points</dt><dd data-ld-score>0</dd></div>
+            <div><dt>Per selection</dt><dd data-ld-power>1</dd></div>
+            <div><dt>Per second</dt><dd data-ld-rate>0</dd></div>
+            <div><dt>Selections</dt><dd data-ld-clicks>0</dd></div>
+        </dl>
+    </div>
 
-    <!-- Lazy Drop Down Game -->
-    <section id="game-lazy-drop-down" class="game-section">
-        <h3 style="font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 8px;">Exhibit C: Lazy Drop Down</h3>
-        <p style="font-size: 0.9rem;">An idle game where dropdowns accumulate points. Watch your score grow.</p>
-        
-        <div id="lazy-game-container" style="overflow: visible;">
-            <div class="idle-game-stats">
-                <div class="score-display">Score: <span id="lazy-score">0</span></div>
-                <div class="stats-display">Clicks per selection: <span id="click-per-select">1</span></div>
-                <div class="stats-display">Tier: <span id="tier-display">1</span></div>
-            </div>
-            
-            <!-- Tier dropdowns will be added here dynamically -->
-            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-top: 28px; margin-bottom: 12px;">Click Me!</h3>
-            
-            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-top: 24px; margin-bottom: 12px;">Upgrades</h3>
-            <div class="upgrades-grid">
-                <button class="btn" id="upgrade-click-power">
-                    Click Power (100 pts)
-                    <br><small>+1 point per selection</small>
-                </button>
-                <button class="btn" id="upgrade-auto-clicker">
-                    Auto-Clicker (500 pts)
-                    <br><small>Generates 1 click/second</small>
-                </button>
-            </div>
-            
-            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-top: 24px; margin-bottom: 12px;">Tier Upgrades</h3>
-            <div class="upgrades-grid">
-                <button class="btn" id="upgrade-tier">
-                    Add Tier (1000 pts)
-                    <br><small>+1 dropdown tier, smaller and harder</small>
-                </button>
-            </div>
-            
-            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-top: 24px; margin-bottom: 12px;">Game Controls</h3>
-            <div class="upgrades-grid">
-                <button class="btn" id="reset-game-btn">Reset Game</button>
-            </div>
+    <div class="lazy">
+        <div class="lazy__board">
+            <p class="label">Tiers — commit any menu to bank</p>
+            <div class="lazy__tiers" data-ld-tiers></div>
         </div>
-
-    </section>
-
-<script>
-// Game selector functionality - wait for scripts to be ready
-(function() {
-    'use strict';
-    
-    console.log('games.html script running...');
-    
-    const gameButtons = document.querySelectorAll('.game-btn');
-    const gameSections = document.querySelectorAll('.game-section');
-    
-    console.log('Found', gameButtons.length, 'buttons and', gameSections.length, 'sections');
-    
-    if (gameButtons.length === 0 || gameSections.length === 0) {
-        console.warn('Missing game buttons or sections!');
-        return;
-    }
-    
-    // Mapping from data-game attribute to global game module name
-    const gameModuleMap = {
-        'find-the-path': 'findPathGame',
-        'hacker': 'hackerGame',
-        'lazy-drop-down': 'lazyDropGame'
-    };
-    
-    // Setup event listeners for game switching
-    function setupGameSwitching() {
-        window._gameSetupDone = true;
-        
-        gameButtons.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                console.log('Button clicked:', btn.getAttribute('data-game'));
-                
-                // Remove active class from all buttons and sections
-                gameButtons.forEach(function(b) { b.classList.remove('active'); });
-                gameSections.forEach(function(s) { s.classList.remove('active'); });
-                
-                // Add active class to clicked button and corresponding section
-                btn.classList.add('active');
-                const dataGameName = btn.getAttribute('data-game');
-                const sectionId = 'game-' + dataGameName;
-                const section = document.getElementById(sectionId);
-                
-                console.log('Section ID:', sectionId, 'Found:', !!section);
-                
-                if (section) {
-                    section.classList.add('active');
-                    
-                    // Initialize the game module if it exists
-                    const globalName = gameModuleMap[dataGameName];
-                    if (globalName && typeof window[globalName] === 'object' && typeof window[globalName].init === 'function') {
-                        try {
-                            console.log('Calling init() on', dataGameName, 'via', globalName);
-                            window[globalName].init();
-                            console.log('Initialized game:', dataGameName);
-                        } catch (e) {
-                            console.error('Error initializing game:', e);
-                        }
-                    } else {
-                        console.warn('Game module not found for:', dataGameName, '(', globalName, ') - Available:', Object.keys(window).filter(function(k) { return k.endsWith('Game'); }));
-                    }
-                }
-            });
-        });
-        
-        console.log('Event listeners attached successfully!');
-    }
-    
-    // Wait for app.js to signal that all game scripts are loaded
-    function startGames() {
-        console.log('All games ready, starting up...');
-        setupGameSwitching();
-        
-        // Initialize the currently active game
-        const activeBtn = document.querySelector('.game-btn.active');
-        if (activeBtn) {
-            const dataGameName = activeBtn.getAttribute('data-game');
-            const globalName = gameModuleMap[dataGameName];
-            if (globalName && typeof window[globalName] === 'object' && typeof window[globalName].init === 'function') {
-                try {
-                    console.log('Initializing default active game:', dataGameName);
-                    window[globalName].init();
-                } catch (e) {
-                    console.error('Error initializing default game:', e);
-                }
-            }
-        }
-    }
-
-    if (window.onGamesReady) {
-        window.onGamesReady(startGames);
-    } else {
-        // Fallback if scripts are already loaded
-        setTimeout(function() {
-            console.log('onGamesReady not set yet, starting games...');
-            startGames();
-        }, 200);
-    }
-
-    // Fallback: ensure we set up within 2 seconds
-    setTimeout(function() {
-        console.log('Fallback: ensuring game switching is setup');
-        if (!window._gameSetupDone) {
-            window._gameSetupDone = true;
-            startGames();
-        }
-    }, 2000);
-})();
-</script>
+        <div class="lazy__side">
+            <p class="label">Upgrades</p>
+            <div class="upgrades" data-ld-upgrades></div>
+            <p class="label">Ledger</p>
+            <ul class="ledger-log" data-ld-log></ul>
+            <button type="button" class="btn btn--sm" data-ld-reset>Wipe this save</button>
+        </div>
+    </div>
+</section>

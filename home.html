@@ -1,0 +1,93 @@
+<!-- ============================================================
+     HOME — the reading-room desk.
+     The signature element is the catalogue drawer: a real, working
+     dropdown that is also the site's navigation.
+     ============================================================ -->
+
+<section class="hero">
+    <div class="u-page">
+        <p class="label label--accent hero__eyebrow">The Dropdown Archive · Est. MMXXVI · One interaction, three wings</p>
+
+        <div class="drawer" id="hero-drawer">
+            <button type="button" class="drawer__trigger" id="hero-drawer-trigger"
+                    aria-haspopup="listbox" aria-expanded="false" aria-controls="hero-drawer-list">
+                <span class="drawer__code" aria-hidden="true">I—III</span>
+                <span class="drawer__value">Choose a wing…</span>
+                <span class="drawer__caret" aria-hidden="true"></span>
+            </button>
+            <ul class="drawer__list" id="hero-drawer-list" role="listbox" aria-label="Archive wings" hidden>
+                <li class="drawer__item" data-menu-item data-route="/education">
+                    <span class="drawer__code">I</span>
+                    <span class="drawer__name">Education</span>
+                    <span class="drawer__note">Every pattern, catalogued</span>
+                </li>
+                <li class="drawer__item" data-menu-item data-route="/games">
+                    <span class="drawer__code">II</span>
+                    <span class="drawer__name">Games</span>
+                    <span class="drawer__note">The interface is the puzzle</span>
+                </li>
+                <li class="drawer__item" data-menu-item data-route="/retro">
+                    <span class="drawer__code">III</span>
+                    <span class="drawer__name">Retro 1999</span>
+                    <span class="drawer__note">Loud, and proud of it</span>
+                </li>
+            </ul>
+        </div>
+
+        <h1 class="hero__title">Everything you choose<br>passes through here.</h1>
+        <p class="hero__lead">
+            A dropdown is the smallest serious interaction on the web: you commit to one thing
+            out of many, in one motion. This archive keeps that motion under a lamp — its
+            taxonomy, its games, and the loud aesthetic it inherited from 1999.
+        </p>
+        <div class="hero__actions">
+            <a class="btn btn--solid" href="#/education">Enter the catalogue</a>
+            <button type="button" class="btn" data-open-palette>Search the archive<span class="kbd-hint">Ctrl K</span></button>
+        </div>
+    </div>
+</section>
+
+<section class="wings u-page" aria-labelledby="wings-heading">
+    <h2 id="wings-heading" class="u-visually-hidden">The three wings</h2>
+    <div class="wings__grid">
+        <a class="wing" href="#/education" data-wing="education">
+            <span class="accession">Wing I</span>
+            <h3>Education</h3>
+            <p>Eleven exhibits on how dropdowns actually work — native, custom, mega, multi,
+                searchable, keyboard-driven — each with the practice that makes it legible.</p>
+            <span class="wing__count" data-wing-count="education">—</span>
+        </a>
+        <a class="wing" href="#/games" data-wing="games">
+            <span class="accession">Wing II</span>
+            <h3>Games</h3>
+            <p>Three games where the menu is the mechanic: a hidden path, a password hidden in
+                the page itself, and an idle clicker measured in selections.</p>
+            <span class="wing__count" data-wing-count="games">—</span>
+        </a>
+        <a class="wing" href="#/retro" data-wing="retro">
+            <span class="accession">Wing III</span>
+            <h3>Retro 1999</h3>
+            <p>Marquee, magenta, a hit counter that never lies, and a guestbook that keeps what
+                you write. Preserved, not mocked.</p>
+            <span class="wing__count" data-wing-count="retro">—</span>
+        </a>
+    </div>
+</section>
+
+<section class="ledger u-page" aria-labelledby="ledger-heading">
+    <h2 id="ledger-heading" class="u-visually-hidden">Reading room notes</h2>
+    <div class="ledger__grid">
+        <article class="ledger__card">
+            <p class="label">Under the lamp today</p>
+            <div id="pick-of-day" class="pick">
+                <p class="pick__loading">Fetching the catalogue index…</p>
+            </div>
+        </article>
+        <article class="ledger__card">
+            <p class="label">Your record book</p>
+            <p class="ledger__stat"><span id="record-count">0</span> of <span id="record-total">9</span> records earned</p>
+            <p class="ledger__note">Records are earned across all three wings and kept in this browser only.</p>
+            <button type="button" class="btn btn--sm" data-open-records>Open record book</button>
+        </article>
+    </div>
+</section>

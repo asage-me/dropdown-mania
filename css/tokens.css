@@ -1,0 +1,394 @@
+/* ============================================================
+   THE DROPDOWN ARCHIVE — tokens.css
+   Design system for the whole archive. Every wing (Education,
+   Games, Retro) derives its colour and type from this file and
+   overrides only --accent. Nothing below hardcodes a colour.
+   ============================================================ */
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Any component that sets `display:` on itself would otherwise beat the
+   UA's [hidden] rule, leaving closed menus painted. State it once, here. */
+[hidden] { display: none !important; }
+
+/* ============================================================
+   PALETTE — "Reading room"
+   A conservation reading room: cool paper, graphite rules,
+   rubric red for anything interactive, cyanotype blue for the
+   Education wing, manila for catalogue labels.
+   Two fully-tuned themes; neither is an afterthought.
+   ============================================================ */
+
+:root {
+    color-scheme: light;
+
+    /* --- Typefaces: wide grotesque / reading serif / catalogue mono --- */
+    --font-display: "Archivo", "Helvetica Neue", Helvetica, sans-serif;
+    --font-body: "Newsreader", Georgia, "Times New Roman", serif;
+    --font-mono: "Space Mono", ui-monospace, "Courier New", monospace;
+
+    --size-h1: clamp(2.6rem, 6.4vw, 4.6rem);
+    --size-h2: clamp(1.7rem, 3.4vw, 2.5rem);
+    --size-h3: 1.22rem;
+    --size-body: 1.043rem;
+    --size-small: 0.9rem;
+    --size-label: 0.68rem;
+
+    --tracking-display: -0.028em;
+    --tracking-label: 0.16em;
+
+    /* --- Surfaces (light = "daylight reading room") --- */
+    --paper: #e7e9e4;
+    --surface: #f4f5f2;
+    --surface-raised: #ffffff;
+    --surface-sunken: #dcded8;
+    --rule: #c6cac2;
+    --rule-strong: #9aa096;
+
+    /* --- Ink --- */
+    --ink: #14171a;
+    --ink-2: #3b4247;
+    --ink-3: #6b7379;
+
+    /* --- Accents --- */
+    --rubric: #c0392b;
+    --rubric-soft: rgba(192, 57, 43, 0.12);
+    --cyanotype: #2c5c8a;
+    --cyanotype-soft: rgba(44, 92, 138, 0.12);
+    --manila: #d9c79b;
+    --patina: #3f7d6e;
+
+    /* Wing accent: what is interactive right now */
+    --accent: var(--rubric);
+    --accent-soft: var(--rubric-soft);
+    --accent-ink: #ffffff;
+
+    /* --- Semantic aliases used by every stylesheet --- */
+    --bg: var(--paper);
+    --panel: var(--surface);
+    --panel-raised: var(--surface-raised);
+    --text: var(--ink);
+    --text-muted: var(--ink-2);
+    --text-faint: var(--ink-3);
+    --border: var(--rule);
+    --border-strong: var(--rule-strong);
+    --focus: var(--accent);
+
+    /* --- Layout --- */
+    --page-max: 1140px;
+    --prose-max: 62ch;
+    --gutter: clamp(20px, 4vw, 40px);
+    --section-gap: clamp(48px, 7vw, 88px);
+    --nav-height: 62px;
+
+    /* --- Motion --- */
+    --t-fast: 140ms cubic-bezier(0.2, 0, 0.2, 1);
+    --t-med: 260ms cubic-bezier(0.2, 0, 0.2, 1);
+    --t-slow: 460ms cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-unfold: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* --- Depth (kept honest: paper does not glow) --- */
+    --shadow-flat: 0 1px 0 rgba(20, 23, 26, 0.05);
+    --shadow-pop: 0 18px 40px -22px rgba(20, 23, 26, 0.55);
+    --radius: 2px;
+}
+
+/* ---------- Dark = "the vault": opened at night, lamp-lit ---------- */
+[data-theme="dark"] {
+    color-scheme: dark;
+
+    --paper: #14171a;
+    --surface: #1b1f23;
+    --surface-raised: #23282d;
+    --surface-sunken: #0f1214;
+    --rule: #313840;
+    --rule-strong: #4c555e;
+
+    --ink: #e8eae6;
+    --ink-2: #b3bab4;
+    --ink-3: #838c92;
+
+    --rubric: #ff6a55;
+    --rubric-soft: rgba(255, 106, 85, 0.16);
+    --cyanotype: #7fb4e5;
+    --cyanotype-soft: rgba(127, 180, 229, 0.16);
+    --manila: #c9b486;
+    --patina: #6fc0a8;
+
+    --accent-ink: #12151a;
+    --shadow-pop: 0 22px 46px -24px rgba(0, 0, 0, 0.9);
+}
+
+/* ---------- Wing accents: one system, three rooms ---------- */
+body[data-mode="education"] {
+    --accent: var(--cyanotype);
+    --accent-soft: var(--cyanotype-soft);
+}
+
+body[data-mode="games"] {
+    --accent: var(--rubric);
+    --accent-soft: var(--rubric-soft);
+}
+
+body[data-mode="retro"] {
+    /* Retro is a deliberately loud exhibit; it owns its own palette
+       but still inherits spacing, type scale and focus rings. */
+    --accent: #ff2d95;
+    --accent-soft: rgba(255, 45, 149, 0.18);
+    --accent-ink: #14171a;
+}
+
+/* ---------- Wing III: the 1999 palette ----------
+   Deliberately outside the theme system: this wing is a period
+   exhibit, so its colours are fixed day or night, light or dark. */
+:root {
+    --retro-desktop: #008080;
+    --retro-page: #d4d0c8;
+    --retro-panel: #c0c0c0;
+    --retro-ridge: outset;
+    --retro-ridge-light: #ffffff;
+    --retro-ridge-dark: #808080;
+    --retro-ink: #000000;
+    --retro-link: #0000ee;
+    --retro-visited: #551a8b;
+    --retro-font: "Times New Roman", Times, serif;
+    --retro-font-mono: "Courier New", Courier, monospace;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: var(--size-body);
+    line-height: 1.65;
+    color: var(--text);
+    background-color: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background-color var(--t-med), color var(--t-med);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: var(--tracking-display);
+    color: var(--text);
+    text-wrap: balance;
+}
+
+h1 { font-size: var(--size-h1); font-stretch: 118%; }
+h2 { font-size: var(--size-h2); font-stretch: 112%; }
+h3 { font-size: var(--size-h3); font-stretch: 105%; letter-spacing: -0.012em; }
+h4, h5, h6 { font-size: 1rem; font-stretch: 100%; }
+
+p { margin-bottom: 1.1em; color: var(--text-muted); max-width: var(--prose-max); }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { color: var(--text); }
+
+img, svg { display: block; max-width: 100%; }
+
+button { font: inherit; color: inherit; }
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+/* One focus treatment everywhere — never removed, always visible */
+:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+/* ---------- Utilities ---------- */
+.u-page {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+}
+
+.u-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.u-skip {
+    position: absolute;
+    left: 12px;
+    top: -60px;
+    z-index: 2000;
+    padding: 10px 16px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-mono);
+    font-size: var(--size-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    transition: top var(--t-fast);
+}
+.u-skip:focus { top: 12px; }
+
+/* Catalogue label — the archive's structural voice.
+   Carries a real accession number, never decorative. */
+.meta-label,
+.label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: var(--size-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--text-faint);
+}
+
+.label--accent { color: var(--accent); }
+
+/* Accession number chip: DD-004 style, used on every exhibit */
+.accession {
+    font-family: var(--font-mono);
+    font-size: var(--size-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 7px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: var(--radius);
+    white-space: nowrap;
+}
+
+/* Hairline rule with a catalogue tick */
+.rule {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin-block: var(--section-gap);
+    position: relative;
+}
+
+/* ============================================================
+   BUTTONS — square, inked, stamp-like
+   ============================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 22px;
+    font-family: var(--font-mono);
+    font-size: var(--size-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    line-height: 1.2;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color var(--t-fast), color var(--t-fast),
+                border-color var(--t-fast), transform var(--t-fast);
+}
+
+.btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+    opacity: 0.42;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn--solid {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+}
+.btn--solid:hover {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
+}
+
+.btn--ghost {
+    border-color: transparent;
+    color: var(--text-muted);
+    padding-inline: 10px;
+}
+.btn--ghost:hover { color: var(--accent); border-color: transparent; }
+
+.btn--sm { padding: 8px 14px; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+}
+
+.site-footer__inner {
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: 26px var(--gutter);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    align-items: baseline;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: var(--size-label);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.site-footer a { color: var(--text-muted); text-decoration: none; }
+.site-footer a:hover { color: var(--accent); }
+
+/* ============================================================
+   MOTION PREFERENCES
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

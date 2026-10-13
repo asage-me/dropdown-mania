@@ -1,467 +1,452 @@
-<div class="content-section active">
-    
-    <!-- Hero Section -->
-    <div class="education-hero">
-        <h2>🎓 Dropdown Mania: Learn by Doing</h2>
-        <p>Explore different types of dropdown components, understand their use cases, and see best practices in action.</p>
+<!-- ============================================================
+     WING I — EDUCATION
+     Eleven exhibits. Each is a working dropdown plus the practice that
+     makes it legible. Behaviour lives in js/modes/education.js.
+     ============================================================ -->
+
+<header class="wing-head">
+    <p class="label label--accent">Wing I — Taxonomy</p>
+    <h2>Every dropdown, taken apart</h2>
+    <p>Eleven exhibits, from the element the browser gives you for free to the one you have to
+        build, label and defend. Nothing here is a screenshot — operate them.</p>
+</header>
+
+<nav class="index" aria-label="Exhibit index">
+    <a class="index__link" href="#dd-001">DD-001 Native select</a>
+    <a class="index__link" href="#dd-002">DD-002 Custom listbox</a>
+    <a class="index__link" href="#dd-003">DD-003 Anatomy</a>
+    <a class="index__link" href="#dd-004">DD-004 Mega menu</a>
+    <a class="index__link" href="#dd-005">DD-005 Multi-select</a>
+    <a class="index__link" href="#dd-006">DD-006 Searchable</a>
+    <a class="index__link" href="#dd-007">DD-007 Grouped</a>
+    <a class="index__link" href="#dd-008">DD-008 Keyboard</a>
+    <a class="index__link" href="#dd-009">DD-009 Naming</a>
+    <a class="index__link" href="#dd-010">DD-010 Anti-patterns</a>
+    <a class="index__link" href="#dd-011">DD-011 Choosing</a>
+</nav>
+
+<!-- ==================== DD-001 ==================== -->
+<section class="exhibit" id="dd-001" data-exhibit="demo" data-accession="DD-001" data-title="Native select" data-route="/education/dd-001">
+    <div class="exhibit__head">
+        <span class="accession">DD-001</span>
+        <h3>The element you get for free</h3>
     </div>
-    
-    <!-- Section 1: Basic Dropdown -->
-    <section class="dropdown-demo">
-        <h3>Standard HTML Select</h3>
-        <p>The native browser dropdown — simple, accessible, and requires zero JavaScript. Best for straightforward selection needs.</p>
-        
-        <div class="demo-container">
-            <label for="basic-select" class="demo-label">Choose a fruit:</label>
-            <select id="basic-select">
-                <option value="">-- Select an option --</option>
-                <option value="apple">Apple 🍎</option>
-                <option value="banana">Banana 🍌</option>
-                <option value="cherry">Cherry 🍒</option>
-                <option value="date">Date 📅</option>
-                <option value="grape">Grape 🍇</option>
+    <p>A native <code>&lt;select&gt;</code> is a complete dropdown: keyboard, screen readers,
+        typeahead, mobile pickers, form value, no JavaScript. If this is enough, stop here.</p>
+
+    <div class="demo">
+        <label class="demo__label" for="dd001-select">Choose a specimen</label>
+        <select id="dd001-select" data-select-variant="sel--demo">
+            <option value="">Select a specimen…</option>
+            <option value="select">&lt;select&gt; — the original</option>
+            <option value="datalist">&lt;input list&gt; — free typing plus suggestions</option>
+            <option value="menu">&lt;menu&gt; — command lists, still settling</option>
+            <option value="details">&lt;details&gt; — disclosure, not selection</option>
+        </select>
+        <p class="demo__readout" data-dd001-readout aria-live="polite">Nothing chosen yet.</p>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Give every control a real <code>&lt;label for&gt;</code>, keep an empty placeholder
+            option when no default is honest, and never disable the placeholder — a disabled
+            first option is how a select ends up submitted blank.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-002 ==================== -->
+<section class="exhibit" id="dd-002" data-exhibit="demo" data-accession="DD-002" data-title="Custom listbox" data-route="/education/dd-002">
+    <div class="exhibit__head">
+        <span class="accession">DD-002</span>
+        <h3>The one you build yourself</h3>
+    </div>
+    <p>A div-based dropdown buys you total styling and costs you every behaviour the browser was
+        doing for free. This one is wired the way the ARIA select-only combobox pattern asks for:
+        <code>role="combobox"</code>, <code>aria-expanded</code>, <code>aria-activedescendant</code>.</p>
+
+    <div class="demo">
+        <p class="demo__label" id="dd002-label">Preservation method</p>
+        <div class="pick" data-dd002>
+            <button type="button" class="pick__trigger" aria-haspopup="listbox" aria-expanded="false"
+                    aria-controls="dd002-list" aria-labelledby="dd002-label dd002-value">
+                <span class="pick__value" id="dd002-value">Choose a method…</span>
+                <span class="pick__caret" aria-hidden="true"></span>
+            </button>
+            <ul class="pick__list" id="dd002-list" role="listbox" aria-labelledby="dd002-label" hidden>
+                <li class="pick__item" data-menu-item>Cold storage</li>
+                <li class="pick__item" data-menu-item>Desiccation</li>
+                <li class="pick__item" data-menu-item>Deacidification</li>
+                <li class="pick__item" data-menu-item>Encapsulation in Mylar</li>
+                <li class="pick__item" data-menu-item>Darkness and 18°C</li>
+            </ul>
+        </div>
+        <p class="demo__readout" data-dd002-readout aria-live="polite">Nothing chosen yet.</p>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Keep focus on the trigger and move <code>aria-activedescendant</code> between options —
+            moving DOM focus into the list is how custom dropdowns lose their scroll position.
+            Support Enter, Space, Up, Down, Home, End, Escape, Tab and typeahead, or do not ship it.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-003 ==================== -->
+<section class="exhibit" id="dd-003" data-exhibit="note" data-accession="DD-003" data-title="Anatomy of a dropdown" data-route="/education/dd-003">
+    <div class="exhibit__head">
+        <span class="accession">DD-003</span>
+        <h3>Anatomy</h3>
+    </div>
+    <p>Five parts, and every dropdown in this archive has all of them, whatever it looks like.</p>
+
+    <div class="anatomy">
+        <div class="anatomy__specimen" aria-hidden="true">
+            <div class="anatomy__trigger"><span>Conservation grade</span><span class="anatomy__caret"></span></div>
+            <ul class="anatomy__list">
+                <li class="is-active">Archival</li>
+                <li>Museum board</li>
+                <li>Acid-free tissue</li>
+            </ul>
+        </div>
+        <ol class="anatomy__parts">
+            <li><span class="anatomy__n">1</span><strong>Trigger</strong> — a real button, with a name that says what you are choosing.</li>
+            <li><span class="anatomy__n">2</span><strong>Current value</strong> — rendered inside the trigger, so the choice survives closing.</li>
+            <li><span class="anatomy__n">3</span><strong>Indicator</strong> — rotates on open; decorative, always <code>aria-hidden</code>.</li>
+            <li><span class="anatomy__n">4</span><strong>Listbox</strong> — one item is <em>active</em> (highlighted) and one is <em>selected</em>. They are not the same thing.</li>
+            <li><span class="anatomy__n">5</span><strong>Commit</strong> — Enter, Space or click writes the value and closes. Escape closes without writing.</li>
+        </ol>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Active is where the highlight is; selected is what will be submitted. Conflating them is
+            the single most common bug in hand-built dropdowns — it makes Escape do nothing.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-004 ==================== -->
+<section class="exhibit" id="dd-004" data-exhibit="demo" data-accession="DD-004" data-title="Mega menu" data-route="/education/dd-004">
+    <div class="exhibit__head">
+        <span class="accession">DD-004</span>
+        <h3>Mega menu</h3>
+    </div>
+    <p>A dropdown that is really a site map. Hover is a convenience, never the only door: this one
+        opens on click and on Enter, closes on Escape, and can be walked with Tab.</p>
+
+    <div class="demo">
+        <div class="mega" data-dd004>
+            <button type="button" class="mega__trigger" aria-expanded="false" aria-controls="dd004-panel">
+                Collections<span class="pick__caret" aria-hidden="true"></span>
+            </button>
+            <div class="mega__panel" id="dd004-panel" hidden>
+                <div class="mega__col">
+                    <p class="label">Wings</p>
+                    <ul>
+                        <li><a href="#/education">Education</a></li>
+                        <li><a href="#/games">Games</a></li>
+                        <li><a href="#/retro">Retro 1999</a></li>
+                    </ul>
+                </div>
+                <div class="mega__col">
+                    <p class="label">Patterns</p>
+                    <ul>
+                        <li><a href="#/education/dd-005">Multi-select</a></li>
+                        <li><a href="#/education/dd-006">Searchable</a></li>
+                        <li><a href="#/education/dd-008">Keyboard</a></li>
+                    </ul>
+                </div>
+                <div class="mega__col">
+                    <p class="label">Records</p>
+                    <ul>
+                        <li><a href="#/" data-open-records>Record book</a></li>
+                        <li><a href="#/education/dd-011">Choosing a pattern</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Keep panels under 3 columns and put the escape hatch (Escape, click outside, Tab past the
+            last link) in first. A mega menu that traps a keyboard user is a menu with one door.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-005 ==================== -->
+<section class="exhibit" id="dd-005" data-exhibit="demo" data-accession="DD-005" data-title="Multi-select" data-route="/education/dd-005">
+    <div class="exhibit__head">
+        <span class="accession">DD-005</span>
+        <h3>Multi-select</h3>
+    </div>
+    <p>Multiple choice inside one dropdown. The discipline is showing what is selected while the
+        menu is closed, and giving a way out of the pile.</p>
+
+    <div class="demo">
+        <p class="demo__label" id="dd005-label">Provenance tags</p>
+        <div class="pick pick--multi" data-dd005>
+            <button type="button" class="pick__trigger" aria-haspopup="listbox" aria-expanded="false"
+                    aria-controls="dd005-list">
+                <span class="pick__value" id="dd005-value">No tags selected</span>
+                <span class="pick__caret" aria-hidden="true"></span>
+            </button>
+            <ul class="pick__list" id="dd005-list" role="listbox" aria-multiselectable="true"
+                aria-labelledby="dd005-label" hidden>
+                <li class="pick__item" data-menu-item role="option" aria-selected="false">Estate sale</li>
+                <li class="pick__item" data-menu-item role="option" aria-selected="false">Found in situ</li>
+                <li class="pick__item" data-menu-item role="option" aria-selected="false">Donated 1998</li>
+                <li class="pick__item" data-menu-item role="option" aria-selected="false">Unverified</li>
+                <li class="pick__item" data-menu-item role="option" aria-selected="false">On loan</li>
+            </ul>
+        </div>
+        <div class="chips" data-dd005-chips><span class="chips__empty">Nothing selected</span></div>
+        <button type="button" class="btn btn--sm" data-dd005-clear>Clear tags</button>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Never make a multi-select whose closed state says only “3 items”. Render the choices, and
+            always ship a clear-all — deselecting one at a time is punishment.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-006 ==================== -->
+<section class="exhibit" id="dd-006" data-exhibit="demo" data-accession="DD-006" data-title="Searchable combobox" data-route="/education/dd-006">
+    <div class="exhibit__head">
+        <span class="accession">DD-006</span>
+        <h3>Searchable combobox</h3>
+    </div>
+    <p>Past a dozen options, scrolling is worse than typing. This is the editable combobox: the
+        input is the trigger, so typing filters and Enter commits the highlighted row.</p>
+
+    <div class="demo">
+        <label class="demo__label" for="dd006-input">Search the accession register</label>
+        <div class="combo" data-dd006>
+            <input class="combo__input" id="dd006-input" type="text" role="combobox"
+                   aria-expanded="false" aria-controls="dd006-list" aria-autocomplete="list"
+                   autocomplete="off" placeholder="Try “paper”, “1998”, “map”…">
+            <ul class="combo__list" id="dd006-list" role="listbox" aria-label="Accession matches" hidden></ul>
+        </div>
+        <p class="demo__readout" data-dd006-count aria-live="polite">18 records. Start typing to filter.</p>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Announce the result count, and say so when the filter returns nothing — silence reads as a
+            broken page. Keep <code>aria-autocomplete="list"</code> pointed at the live list.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-007 ==================== -->
+<section class="exhibit" id="dd-007" data-exhibit="demo" data-accession="DD-007" data-title="Grouped options" data-route="/education/dd-007">
+    <div class="exhibit__head">
+        <span class="accession">DD-007</span>
+        <h3>Grouped options</h3>
+    </div>
+    <p>Structure inside the list is information. <code>&lt;optgroup&gt;</code> is free, survives into
+        the accessibility tree, and is the reason a 40-option select stays usable.</p>
+
+    <div class="demo">
+        <label class="demo__label" for="dd007-select">Request a conservation material</label>
+        <select id="dd007-select" data-select-variant="sel--demo">
+            <option value="">Select a material…</option>
+            <optgroup label="Paper">
+                <option value="rag">Cotton rag board</option>
+                <option value="washi">Washi tissue</option>
+                <option value="mylar">Mylar encapsulation</option>
+            </optgroup>
+            <optgroup label="Adhesives">
+                <option value="starch">Wheat starch paste</option>
+                <option value="methyl">Methyl cellulose</option>
+            </optgroup>
+            <optgroup label="Furniture">
+                <option value="phase">Phase-change cabinet</option>
+                <option value="solander">Solander box</option>
+            </optgroup>
+        </select>
+        <p class="demo__readout" data-dd007-readout aria-live="polite">Nothing chosen yet.</p>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Group when the groups are real categories a reader would name. Alphabetising a flat list
+            of 40 items is sorting; grouping it is thinking.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-008 ==================== -->
+<section class="exhibit" id="dd-008" data-exhibit="demo" data-accession="DD-008" data-title="Keyboard-only operation" data-route="/education/dd-008">
+    <div class="exhibit__head">
+        <span class="accession">DD-008</span>
+        <h3>Keyboard-only</h3>
+    </div>
+    <p>Put the mouse down. Focus the control, then work through the map. Every key below is
+        implemented by both dropdown components in this archive, and the log shows what you pressed.</p>
+
+    <div class="demo demo--split">
+        <div class="keymap">
+            <p class="label">The map</p>
+            <dl class="keymap__list">
+                <div><dt>Enter / Space</dt><dd>Open, or commit the active option</dd></div>
+                <div><dt>↓ / ↑</dt><dd>Open, or move the active option (wraps)</dd></div>
+                <div><dt>Home / End</dt><dd>First / last option</dd></div>
+                <div><dt>a–z</dt><dd>Typeahead jumps to a match</dd></div>
+                <div><dt>Escape</dt><dd>Close without committing</dd></div>
+                <div><dt>Tab</dt><dd>Close, move on, commit nothing</dd></div>
+            </dl>
+        </div>
+        <div>
+            <label class="demo__label" for="dd008-select">Try it here</label>
+            <select id="dd008-select" data-select-variant="sel--demo">
+                <option value="">Select a handling rule…</option>
+                <option value="two-hands">Two hands, always</option>
+                <option value="gloves">Nitrile for photographs</option>
+                <option value="pencil">Pencil only near originals</option>
+                <option value="support">Book cradle, never force flat</option>
             </select>
+            <p class="label keylog__title">Key log</p>
+            <ul class="keylog" data-dd008-log aria-live="polite">
+                <li class="keylog__item keylog__item--empty">No keys yet.</li>
+            </ul>
         </div>
-        
-        <div class="info-box">
-            <strong>💡 Best Practice:</strong> Always include a placeholder option (empty first option) to encourage user interaction. Use the labels attribute for accessibility.
-        </div>
-    </section>
+    </div>
 
-    <!-- Section 2: Custom Dropdown -->
-    <section class="dropdown-demo">
-        <h3>Custom Dropdown Implementation</h3>
-        <p>A fully customizable dropdown built from scratch. Complete styling control with JavaScript-powered behavior.</p>
-        
-        <div class="demo-container">
-            <div class="custom-dropdown-wrapper" style="position: relative; z-index: 10;">
-                <div class="custom-dropdown" id="custom-select-trigger">
-                    <span class="selected-value">Select an item...</span>
-                    <span class="arrow">&#9662;</span>
-                </div>
-                <div class="dropdown-menu" id="custom-select-menu">
-                    <div class="dropdown-item" data-value="option1">Option 1</div>
-                    <div class="dropdown-item" data-value="option2">Option 2</div>
-                    <div class="dropdown-item" data-value="option3">Option 3</div>
-                    <div class="dropdown-item" data-value="option4">Option 4</div>
-                </div>
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>If your dropdown cannot be operated with one hand on the keyboard, it is not a dropdown —
+            it is a picture of one that happens to respond to a mouse.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-009 ==================== -->
+<section class="exhibit" id="dd-009" data-exhibit="demo" data-accession="DD-009" data-title="Accessible naming" data-route="/education/dd-009">
+    <div class="exhibit__head">
+        <span class="accession">DD-009</span>
+        <h3>What a screen reader says</h3>
+    </div>
+    <p>A dropdown's name is computed, not declared. Pick a specimen and the panel shows what a
+        screen reader would announce, in the order the specification resolves it.</p>
+
+    <div class="demo demo--split">
+        <div>
+            <p class="demo__label" id="dd009-label">Specimen</p>
+            <div class="pick" data-dd009>
+                <button type="button" class="pick__trigger" aria-haspopup="listbox" aria-expanded="false"
+                        aria-controls="dd009-list">
+                    <span class="pick__value">Choose a specimen…</span>
+                    <span class="pick__caret" aria-hidden="true"></span>
+                </button>
+                <ul class="pick__list" id="dd009-list" role="listbox" aria-labelledby="dd009-label" hidden>
+                    <li class="pick__item" data-menu-item data-name="labelled">Properly labelled</li>
+                    <li class="pick__item" data-menu-item data-name="orphan">No name at all</li>
+                    <li class="pick__item" data-menu-item data-name="title">Title attribute only</li>
+                    <li class="pick__item" data-menu-item data-name="labelledby">aria-labelledby</li>
+                    <li class="pick__item" data-menu-item data-name="placeholder">Placeholder as a label</li>
+                </ul>
             </div>
         </div>
-        
-        <div class="info-box">
-            <strong>💡 Best Practice:</strong> Custom dropdowns allow for complete styling control but require JavaScript for functionality. Remember to handle keyboard navigation for accessibility.
+        <div class="announce" data-dd009-out>
+            <p class="label">Announced as</p>
+            <p class="announce__said" data-dd009-said>Choose a specimen to compute its name.</p>
+            <p class="announce__why" data-dd009-why></p>
         </div>
-    </section>
+    </div>
 
-    <!-- Section 3: Mega Menu -->
-    <section class="dropdown-demo">
-        <h3>Mega Dropdown Menu</h3>
-        <p>A rich multi-column menu for sites with extensive navigation. Perfect for e-commerce, SaaS, and content-heavy platforms.</p>
-        
-        <div class="demo-container mega-menu" id="mega-menu">
-            <button class="menu-toggle">📂 Categories</button>
-            <div class="menu-panel">
-                <div class="category-links">
-                    <strong>Education</strong>
-                    <ul>
-                        <li><a href="#">Courses</a></li>
-                        <li><a href="#">Tutorials</a></li>
-                        <li><a href="#">Certificates</a></li>
-                    </ul>
-                </div>
-                <div class="category-links">
-                    <strong>Tools</strong>
-                    <ul>
-                        <li><a href="#">Builders</a></li>
-                        <li><a href="#">Converters</a></li>
-                        <li><a href="#">Generators</a></li>
-                    </ul>
-                </div>
-                <div class="category-links">
-                    <strong>Community</strong>
-                    <ul>
-                        <li><a href="#">Forums</a></li>
-                        <li><a href="#">Events</a></li>
-                        <li><a href="#">Chat</a></li>
-                    </ul>
-                </div>
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Resolution order, roughly: <code>aria-labelledby</code>, then <code>aria-label</code>, then
+            <code>&lt;label&gt;</code>, then <code>title</code>, then nothing. Placeholder is not a
+            label — it disappears the moment anyone types.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-010 ==================== -->
+<section class="exhibit" id="dd-010" data-exhibit="demo" data-accession="DD-010" data-title="Anti-patterns" data-route="/education/dd-010">
+    <div class="exhibit__head">
+        <span class="accession">DD-010</span>
+        <h3>Four ways to break one</h3>
+    </div>
+    <p>Each of these ships in production software every week. Try to operate them the way a
+        keyboard or a screen reader would.</p>
+
+    <div class="anti">
+        <article class="anti__card">
+            <p class="label label--accent">Failure 1</p>
+            <h4>Hover-only</h4>
+            <div class="anti__hover" data-dd010-hover>
+                <button type="button" class="btn btn--sm" aria-disabled="true">Reports</button>
+                <ul class="anti__hoverlist">
+                    <li>Annual</li><li>Quarterly</li><li>Condition</li>
+                </ul>
             </div>
-        </div>
-        
-        <div class="info-box">
-            <strong>💡 Best Practice:</strong> Mega menus are great for sites with lots of content. Keep them simple and organized with clear categories.
-        </div>
-    </section>
+            <p class="anti__note">This panel opens on <em>hover</em> and nothing else. Press Tab: it
+                never opens. Touch users have no hover either.</p>
+        </article>
 
-    <!-- Section 4: Multi-Select Dropdown -->
-    <section class="dropdown-demo">
-        <h3>Multi-Select Dropdown</h3>
-        <p>Allow users to pick multiple items from a list. Ideal for filters, tags, and preference settings.</p>
-        
-        <div class="demo-container multi-select-wrapper" id="multi-select-demo">
-            <div class="custom-dropdown multi-select-trigger" tabindex="0" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Select multiple fruits" title="Select multiple fruits">
-                <span class="selected-value">Choose fruits...</span>
-                <span class="arrow">&#9662;</span>
-            </div>
-            <div class="dropdown-menu multi-select-menu" role="listbox" aria-multiselectable="true" aria-label="Fruit selection options">
-                <div class="multi-select-option"><input type="checkbox" id="ms-apple" data-value="apple" role="option" aria-selected="false"> <label for="ms-apple">Apple 🍎</label></div>
-                <div class="multi-select-option"><input type="checkbox" id="ms-banana" data-value="banana" role="option" aria-selected="false"> <label for="ms-banana">Banana 🍌</label></div>
-                <div class="multi-select-option"><input type="checkbox" id="ms-cherry" data-value="cherry" role="option" aria-selected="false"> <label for="ms-cherry">Cherry 🍒</label></div>
-                <div class="multi-select-option"><input type="checkbox" id="ms-date" data-value="date" role="option" aria-selected="false"> <label for="ms-date">Date 📅</label></div>
-                <div class="multi-select-option"><input type="checkbox" id="ms-grape" data-value="grape" role="option" aria-selected="false"> <label for="ms-grape">Grape 🍇</label></div>
-            </div>
-        </div>
-        
-        <div class="info-box">
-            <strong>💡 Best Practice:</strong> Multi-select dropdowns are ideal when users need to choose multiple items. Always show selected values clearly and provide a way to deselect individual options or clear all selections. Use checkboxes within the dropdown for clarity.
-        </div>
-    </section>
+        <article class="anti__card">
+            <p class="label label--accent">Failure 2</p>
+            <h4>No accessible name</h4>
+            <select class="anti__bare" data-select-variant="sel--demo">
+                <option>Sort by accession</option>
+                <option>Sort by date</option>
+                <option>Sort by donor</option>
+            </select>
+            <p class="anti__note">No label, no <code>aria-label</code>, no title. A screen reader
+                announces only “combo box” and the current value — the purpose is gone.</p>
+        </article>
 
-    <!-- Section 5: Searchable Dropdown -->
-    <section class="dropdown-demo">
-        <h3>Searchable Dropdown</h3>
-        <p>When your option list grows beyond 10 items, add search functionality to improve usability and reduce scroll fatigue.</p>
-        
-        <div class="demo-container searchable-dropdown no-radius" id="searchable-select">
-            <label class="demo-label">Select a fruit:</label>
-            <input type="text" class="search-input" placeholder="Search options..." aria-label="Search options">
-            <div class="custom-select-trigger-wrapper">
-                <div class="custom-select-trigger" role="combobox" aria-expanded="false" aria-haspopup="listbox" tabindex="0">
-                    <span class="selected-value">-- Select an option --</span>
-                    <span class="arrow">&#9662;</span>
-                </div>
-                <div class="custom-select-menu" role="listbox" aria-label="Fruit options">
-                    <div class="custom-select-option" data-value="" data-text="-- Select an option --">-- Select an option --</div>
-                    <div class="custom-select-option" data-value="apple" data-text="Apple">Apple</div>
-                    <div class="custom-select-option" data-value="apricot" data-text="Apricot">Apricot</div>
-                    <div class="custom-select-option" data-value="avocado" data-text="Avocado">Avocado</div>
-                    <div class="custom-select-option" data-value="banana" data-text="Banana">Banana</div>
-                    <div class="custom-select-option" data-value="blackberry" data-text="Blackberry">Blackberry</div>
-                    <div class="custom-select-option" data-value="blueberry" data-text="Blueberry">Blueberry</div>
-                    <div class="custom-select-option" data-value="cherry" data-text="Cherry">Cherry</div>
-                    <div class="custom-select-option" data-value="coconut" data-text="Coconut">Coconut</div>
-                    <div class="custom-select-option" data-value="cranberry" data-text="Cranberry">Cranberry</div>
-                    <div class="custom-select-option" data-value="date" data-text="Date">Date</div>
-                    <div class="custom-select-option" data-value="dragonfruit" data-text="Dragon Fruit">Dragon Fruit</div>
-                    <div class="custom-select-option" data-value="durian" data-text="Durian">Durian</div>
-                    <div class="custom-select-option" data-value="fig" data-text="Fig">Fig</div>
-                    <div class="custom-select-option" data-value="grape" data-text="Grape">Grape</div>
-                    <div class="custom-select-option" data-value="grapefruit" data-text="Grapefruit">Grapefruit</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="info-box">
-            <strong>💡 Best Practice:</strong> For long lists, searchable dropdowns improve usability. Always show the search results count when filtering.
-        </div>
-    </section>
+        <article class="anti__card">
+            <p class="label label--accent">Failure 3</p>
+            <h4>Div with an onclick</h4>
+            <div class="anti__div" data-dd010-div tabindex="-1">Choose a decade ▾</div>
+            <p class="anti__note">Not focusable, no role, no options, no keyboard. It cannot be
+                reached, so it does not exist for half your users.</p>
+        </article>
 
-    <!-- Education Demos JavaScript -->
-    <script>
-    // Custom Dropdown Implementation
-    (function() {
-        const trigger = document.getElementById('custom-select-trigger');
-        const menu = document.getElementById('custom-select-menu');
-        
-        if (trigger && menu) {
-            let isOpen = false;
-            
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                isOpen = !isOpen;
-                menu.classList.toggle('active', isOpen);
-                trigger.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
-            });
-            
-            // Close when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!trigger.contains(e.target)) {
-                    isOpen = false;
-                    menu.classList.remove('active');
-                    trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
-                }
-            });
-            
-            // Handle item selection
-            const items = menu.querySelectorAll('.dropdown-item');
-            items.forEach(function(item) {
-                item.addEventListener('click', function() {
-                    const value = this.getAttribute('data-value');
-                    trigger.querySelector('.selected-value').textContent = this.textContent;
-                    isOpen = false;
-                    menu.classList.remove('active');
-                    trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
-                    
-                    // Visual feedback
-                    trigger.style.borderColor = '#667eea';
-                    trigger.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
-                    setTimeout(() => {
-                        trigger.style.borderColor = '';
-                        trigger.style.boxShadow = '';
-                    }, 600);
-                    
-                    console.log('Selected:', value);
-                });
-            });
-        }
-    })();
-    
-    // Mega Menu Toggle
-    (function() {
-        const megaMenu = document.getElementById('mega-menu');
-        if (megaMenu) {
-            const toggleBtn = megaMenu.querySelector('.menu-toggle');
-            const menuPanel = megaMenu.querySelector('.menu-panel');
-            
-            if (toggleBtn && menuPanel) {
-                toggleBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const isActive = menuPanel.classList.toggle('active');
-                    megaMenu.classList.toggle('open', isActive);
-                    toggleBtn.textContent = isActive ? '📂 Close Categories' : '📂 Categories';
-                });
-                
-                // Prevent links inside the menu from navigating/scrolling to top
-                menuPanel.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'A') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                });
+        <article class="anti__card">
+            <p class="label label--accent">Failure 4</p>
+            <h4>Options that move</h4>
+            <p class="anti__note anti__note--solo">A list that re-sorts while you are arrowing
+                through it turns typeahead into a lottery. Freeze the order while the listbox is open.</p>
+        </article>
+    </div>
 
-                // Close when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!megaMenu.contains(e.target)) {
-                        menuPanel.classList.remove('active');
-                        megaMenu.classList.remove('open');
-                        toggleBtn.textContent = '📂 Categories';
-                    }
-                });
-            }
-        }
-    })();
-    
-    // Searchable Dropdown
-    (function() {
-        const searchable = document.getElementById('searchable-select');
-        if (!searchable) return;
-        
-        const searchInput = searchable.querySelector('.search-input');
-        const trigger = searchable.querySelector('.custom-select-trigger');
-        const menu = searchable.querySelector('.custom-select-menu');
-        const selectedValue = searchable.querySelector('.selected-value');
-        const options = searchable.querySelectorAll('.custom-select-option');
-        
-        let isOpen = false;
-        let selectedOption = null;
-        
-        // Toggle dropdown
-        function toggleDropdown() {
-            isOpen = !isOpen;
-            
-            if (isOpen) {
-                menu.classList.add('active');
-                searchable.classList.add('dropdown-open');
-            } else {
-                menu.classList.remove('active');
-                searchable.classList.remove('dropdown-open');
-            }
-            
-            trigger.setAttribute('aria-expanded', isOpen.toString());
-            trigger.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
-            
-            if (isOpen) {
-                searchInput.focus();
-                filterOptions(searchInput.value.toLowerCase());
-            }
-        }
-        
-        // Filter options based on search
-        function filterOptions(searchTerm) {
-            let visibleCount = 0;
-            
-            options.forEach(function(option) {
-                const text = option.getAttribute('data-text').toLowerCase();
-                if (text.includes(searchTerm)) {
-                    option.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-            
-            searchInput.placeholder = visibleCount > 0 
-                ? `${visibleCount} result${visibleCount > 1 ? 's' : ''} found` 
-                : 'No results found';
-        }
-        
-        // Select option
-        function selectOption(option) {
-            // Remove previous selection
-            if (selectedOption) {
-                selectedOption.classList.remove('selected');
-            }
-            
-            selectedOption = option;
-            selectedValue.textContent = option.getAttribute('data-text');
-            selectedValue.style.fontWeight = '600';
-            
-            // Update trigger styling
-            trigger.style.borderColor = '#667eea';
-            trigger.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
-            
-            // Close dropdown
-            isOpen = false;
-            menu.classList.remove('active');
-            trigger.setAttribute('aria-expanded', 'false');
-            trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
-            
-            // Reset search
-            searchInput.value = '';
-            searchInput.placeholder = 'Search options...';
-            filterOptions('');
-        }
-        
-        // Event listeners
-        trigger.addEventListener('click', function(e) {
-            e.stopPropagation();
-            toggleDropdown();
-        });
-        
-        searchInput.addEventListener('input', function(e) {
-            filterOptions(e.target.value.toLowerCase());
-        });
-        
-        options.forEach(function(option) {
-            option.addEventListener('click', function() {
-                selectOption(this);
-            });
-        });
-        
-        // Close on outside click
-        document.addEventListener('click', function(e) {
-            if (!searchable.contains(e.target) && isOpen) {
-                isOpen = false;
-                menu.classList.remove('active');
-                trigger.setAttribute('aria-expanded', 'false');
-                trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
-            }
-        });
-        
-        // Keyboard support
-        trigger.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                toggleDropdown();
-            } else if (e.key === 'Escape' && isOpen) {
-                isOpen = false;
-                menu.classList.remove('active');
-                trigger.setAttribute('aria-expanded', 'false');
-                trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
-            }
-        });
-    })();
-    
-    // Basic Select Feedback
-    (function() {
-        const basicSelect = document.getElementById('basic-select');
-        if (basicSelect) {
-            basicSelect.addEventListener('change', function(e) {
-                const value = e.target.value;
-                if (value) {
-                    // Visual feedback
-                    this.style.borderColor = '#667eea';
-                    this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
-                    setTimeout(() => {
-                        this.style.borderColor = '';
-                        this.style.boxShadow = '';
-                    }, 600);
-                    console.log('Basic select changed to:', value);
-                }
-            });
-        }
-    })();
-    
-    // Multi-Select Dropdown
-    (function() {
-        const trigger = document.getElementById('multi-select-demo');
-        if (!trigger) return;
-        
-        const dropdown = trigger.querySelector('.multi-select-trigger');
-        const menu = trigger.querySelector('.multi-select-menu');
-        const selectedDisplay = dropdown.querySelector('.selected-value');
-        let isOpen = false;
-        
-        function updateSelectedText() {
-            const checkedItems = menu.querySelectorAll('input[type="checkbox"]:checked');
-            if (checkedItems.length === 0) {
-                selectedDisplay.textContent = 'Choose fruits...';
-                dropdown.style.borderColor = '';
-                dropdown.style.boxShadow = '';
-            } else {
-                selectedDisplay.textContent = Array.from(checkedItems).map(cb => cb.nextElementSibling.textContent.trim()).join(', ');
-                dropdown.style.borderColor = '#667eea';
-                dropdown.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
-            }
-        }
-        
-        dropdown.addEventListener('click', function(e) {
-            if (e.target.type === 'checkbox' || e.target.tagName === 'LABEL') return;
-            e.preventDefault();
-            e.stopPropagation();
-            isOpen = !isOpen;
-            menu.classList.toggle('active', isOpen);
-            dropdown.setAttribute('aria-expanded', isOpen.toString());
-            dropdown.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
-        });
-        
-        // Keyboard support for combobox
-        dropdown.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                isOpen = !isOpen;
-                menu.classList.toggle('active', isOpen);
-                dropdown.setAttribute('aria-expanded', isOpen.toString());
-                dropdown.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
-            } else if (e.key === 'Escape') {
-                isOpen = false;
-                menu.classList.remove('active');
-                dropdown.setAttribute('aria-expanded', 'false');
-                dropdown.querySelector('.arrow').style.transform = 'translateY(-50%)';
-            }
-        });
-        
-        // Close when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!trigger.contains(e.target)) {
-                isOpen = false;
-                menu.classList.remove('active');
-                dropdown.setAttribute('aria-expanded', 'false');
-                dropdown.querySelector('.arrow').style.transform = 'translateY(-50%)';
-            }
-        });
-        
-        // Handle checkbox changes and aria-selected updates
-        const checkboxes = menu.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
-                this.setAttribute('aria-selected', this.checked.toString());
-                updateSelectedText();
-            });
-            
-            // Allow clicking the option div to toggle the checkbox
-            var optionDiv = checkbox.parentElement;
-            if (optionDiv) {
-                optionDiv.addEventListener('click', function(e) {
-                    if (e.target.type === 'checkbox') return; // Let the checkbox handle its own click
-                    e.preventDefault();
-                    e.stopPropagation();
-                    checkbox.checked = !checkbox.checked;
-                    checkbox.dispatchEvent(new Event('change'));
-                });
-            }
-        });
-    })();
-    </script>
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>The test costs ten seconds: unplug the mouse, or close your eyes and press Tab. If you
+            cannot open it, choose one, and leave, it is broken.</p>
+    </aside>
+</section>
+
+<!-- ==================== DD-011 ==================== -->
+<section class="exhibit" id="dd-011" data-exhibit="note" data-accession="DD-011" data-title="Choosing a pattern" data-route="/education/dd-011">
+    <div class="exhibit__head">
+        <span class="accession">DD-011</span>
+        <h3>Choosing a pattern</h3>
+    </div>
+    <p>The honest table. Cost is what you have to build and test, not what you have to write.</p>
+
+    <div class="table-wrap">
+        <table class="table">
+            <caption class="u-visually-hidden">Dropdown patterns compared by cost, accessibility and when to use them</caption>
+            <thead>
+                <tr><th scope="col">Pattern</th><th scope="col">Cost</th><th scope="col">Accessible by default</th><th scope="col">Use it when</th></tr>
+            </thead>
+            <tbody>
+                <tr><th scope="row">Native select</th><td>None</td><td>Yes</td><td>One value, list fits on a screen.</td></tr>
+                <tr><th scope="row">Native + optgroup</th><td>None</td><td>Yes</td><td>10–40 values with real categories.</td></tr>
+                <tr><th scope="row">input + datalist</th><td>None</td><td>Mostly</td><td>Values are suggestions, free text is valid.</td></tr>
+                <tr><th scope="row">Custom listbox</th><td>High</td><td>Only if you build it</td><td>You need rich rows, or styling the browser refuses.</td></tr>
+                <tr><th scope="row">Multi-select</th><td>High</td><td>Only if you build it</td><td>Filters and tags — and you show the selection closed.</td></tr>
+                <tr><th scope="row">Combobox</th><td>High</td><td>Only if you build it</td><td>More than ~30 options, or remote data.</td></tr>
+                <tr><th scope="row">Mega menu</th><td>Medium</td><td>Only with click + Esc</td><td>Navigation for a large site, not a form value.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <aside class="practice">
+        <p class="label">Practice</p>
+        <p>Reach for custom only when a native control has actually failed you, and write down which
+            requirement it failed. “It looks better” is a real reason — it is just not a cheap one.</p>
+    </aside>
+</section>

@@ -1,90 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Dropdown Archive</title>
-    <!-- Typography -->
+    <meta name="description" content="A catalogue of dropdown menus: their taxonomy, the games built from them, and the aesthetic they inherited from 1999.">
+    <meta name="color-scheme" content="light dark">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- Base Styles -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap">
+
+    <!-- Every stylesheet loads once; wings scope their rules under body[data-mode]. -->
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/select.css">
     <link rel="stylesheet" href="css/nav.css">
-    <link rel="stylesheet" href="css/custom-select.css">
-    <!-- Dynamic Page Styles (will be overridden by mode) -->
-    <link id="page-style" rel="stylesheet" href="css/education.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/education.css">
+    <link rel="stylesheet" href="css/games.css">
+    <link rel="stylesheet" href="css/retro-1999.css">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314171a'/%3E%3Cpath d='M7 11h18M7 17h18M7 23h11' stroke='%23c0392b' stroke-width='2.5'/%3E%3C/svg%3E">
 </head>
-<body class="mode-home">
-    <!-- Navigation — institutional label treatment -->
-    <nav class="top-nav">
-        <div class="nav-container">
-            <a href="#" class="site-title">The Dropdown <span>Archive</span></a>
-            <div class="mode-selector">
-                <label for="main-mode-select" class="mode-label">Collection:</label>
-                <select id="main-mode-select" class="mode-dropdown">
-                    <option value="education">Education</option>
-                    <option value="games">Games</option>
-                    <option value="retro">Retro 1999</option>
-                </select>
-                <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle dark mode" aria-label="Toggle dark mode">◑</button>
-            </div>
-        </div>
-    </nav>
+<body data-mode="home">
+    <a class="u-skip" href="#main-content">Skip to the archive</a>
 
-    <!-- Main Content Area -->
-    <main id="main-content" class="archive-page">
-        <!-- Hero — the thesis statement with animated dropdown signature element -->
-        <section class="home-hero">
-            <span class="meta-label">The Dropdown Archive — Est. 2026</span>
+    <header class="site-header">
+        <nav class="nav" id="site-nav" aria-label="Archive">
+            <a class="nav__brand" href="#/">
+                The Dropdown <span>Archive</span>
+            </a>
 
-            <!-- Animated demo dropdown (signature element) -->
-            <div class="hero-dropdown-demo dropdown-demo" id="hero-dropdown">
-                <div class="dropdown-trigger" id="hero-dropdown-trigger">
-                    <span id="hero-dropdown-label">Select a collection…</span>
-                    <span class="arrow">▼</span>
+            <ul class="nav__wings">
+                <li><a class="nav__link" data-nav-link="education" href="#/education">I · Education</a></li>
+                <li><a class="nav__link" data-nav-link="games" href="#/games">II · Games</a></li>
+                <li><a class="nav__link" data-nav-link="retro" href="#/retro">III · Retro 1999</a></li>
+            </ul>
+
+            <div class="nav__tools">
+                <button type="button" class="nav__palette" data-open-palette>
+                    Search<span class="kbd-hint">Ctrl K</span>
+                </button>
+
+                <div class="nav__mode">
+                    <label class="nav__mode-label" for="mode-select">Wing</label>
+                    <select id="mode-select">
+                        <option value="home">Reading room</option>
+                        <option value="education">I · Education</option>
+                        <option value="games">II · Games</option>
+                        <option value="retro">III · Retro 1999</option>
+                    </select>
                 </div>
-                <div class="dropdown-menu" id="hero-dropdown-menu">
-                    <div class="dropdown-item active" data-mode="education">Education — Learn the patterns</div>
-                    <div class="dropdown-item" data-mode="games">Games — Play with them</div>
-                    <div class="dropdown-item" data-mode="retro">Retro 1999 — Remember them</div>
-                </div>
-            </div>
 
-            <h1>Everything you choose<br>passes through here.</h1>
-            <p class="hero-lead">Dropdown menus are the invisible infrastructure of digital life. This archive examines their taxonomy, the games they enable, and the aesthetic they inherited from an earlier web.</p>
-            <div class="hero-actions">
-                <button data-mode="education" class="btn btn-accent">Browse Collection</button>
-                <button data-mode="games" class="btn btn-ghost">Enter Games</button>
+                <button type="button" class="nav__theme" id="theme-toggle" aria-pressed="false">
+                    <span class="nav__theme-mark" aria-hidden="true">◐</span>
+                    <span data-theme-label>Daylight</span>
+                    <span class="u-visually-hidden">Toggle the reading-room theme</span>
+                </button>
             </div>
-        </section>
+        </nav>
+    </header>
 
-        <!-- Two-column provenance / archive cards -->
-        <div class="archive-cards">
-            <div class="archive-card">
-                <span class="card-label">Provenance</span>
-                <h3>The architecture of a single click</h3>
-                <p>Dropdown menus are the invisible infrastructure of digital life. We interact with thousands of them daily — to choose, to navigate, to configure — yet rarely notice their design. This project is a study in that unnoticed craft.</p>
+    <main id="main-content" class="wing" tabindex="-1">
+        <!-- The router mounts the active wing here. -->
+        <noscript>
+            <div class="load-error">
+                <h2>The archive needs JavaScript</h2>
+                <p>Each wing is a working exhibit — dropdowns that open, filter, remember and
+                    validate — so this site cannot run without scripting enabled.</p>
             </div>
-            <div class="archive-card">
-                <span class="card-label">Collections</span>
-                <h3>Three ways to look at dropdowns</h3>
-                <p><span class="card-strong">Education</span> — Learn the patterns, best practices, and taxonomy of every dropdown type.<br><span class="card-green">Games</span> — Play interactive puzzles built entirely from dropdown mechanics.<br><span class="card-muted">Retro 1999</span> — A nostalgic trip back to when the web was loud and unapologetic.</p>
-            </div>
-        </div>
-
-        <!-- Content will be injected here based on mode selection -->
+        </noscript>
     </main>
 
-    <!-- Custom Select Component -->
-    <script src="js/custom-select.js"></script>
-
-    <!-- Footer -->
     <footer class="site-footer">
-        <p>The Dropdown Archive —MMXXVI</p>
+        <div class="site-footer__inner">
+            <span>The Dropdown Archive · MMXXVI</span>
+            <span>17 exhibits · 3 wings · 1 interaction</span>
+            <span><a href="#/" data-open-records>Record book</a> · <a href="#/" data-open-palette>Index</a></span>
+        </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="js/app.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
