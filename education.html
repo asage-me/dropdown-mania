@@ -1,0 +1,467 @@
+<div class="content-section active">
+    
+    <!-- Hero Section -->
+    <div class="education-hero">
+        <h2>🎓 Dropdown Mania: Learn by Doing</h2>
+        <p>Explore different types of dropdown components, understand their use cases, and see best practices in action.</p>
+    </div>
+    
+    <!-- Section 1: Basic Dropdown -->
+    <section class="dropdown-demo">
+        <h3>Standard HTML Select</h3>
+        <p>The native browser dropdown — simple, accessible, and requires zero JavaScript. Best for straightforward selection needs.</p>
+        
+        <div class="demo-container">
+            <label for="basic-select" class="demo-label">Choose a fruit:</label>
+            <select id="basic-select">
+                <option value="">-- Select an option --</option>
+                <option value="apple">Apple 🍎</option>
+                <option value="banana">Banana 🍌</option>
+                <option value="cherry">Cherry 🍒</option>
+                <option value="date">Date 📅</option>
+                <option value="grape">Grape 🍇</option>
+            </select>
+        </div>
+        
+        <div class="info-box">
+            <strong>💡 Best Practice:</strong> Always include a placeholder option (empty first option) to encourage user interaction. Use the labels attribute for accessibility.
+        </div>
+    </section>
+
+    <!-- Section 2: Custom Dropdown -->
+    <section class="dropdown-demo">
+        <h3>Custom Dropdown Implementation</h3>
+        <p>A fully customizable dropdown built from scratch. Complete styling control with JavaScript-powered behavior.</p>
+        
+        <div class="demo-container">
+            <div class="custom-dropdown-wrapper" style="position: relative; z-index: 10;">
+                <div class="custom-dropdown" id="custom-select-trigger">
+                    <span class="selected-value">Select an item...</span>
+                    <span class="arrow">&#9662;</span>
+                </div>
+                <div class="dropdown-menu" id="custom-select-menu">
+                    <div class="dropdown-item" data-value="option1">Option 1</div>
+                    <div class="dropdown-item" data-value="option2">Option 2</div>
+                    <div class="dropdown-item" data-value="option3">Option 3</div>
+                    <div class="dropdown-item" data-value="option4">Option 4</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <strong>💡 Best Practice:</strong> Custom dropdowns allow for complete styling control but require JavaScript for functionality. Remember to handle keyboard navigation for accessibility.
+        </div>
+    </section>
+
+    <!-- Section 3: Mega Menu -->
+    <section class="dropdown-demo">
+        <h3>Mega Dropdown Menu</h3>
+        <p>A rich multi-column menu for sites with extensive navigation. Perfect for e-commerce, SaaS, and content-heavy platforms.</p>
+        
+        <div class="demo-container mega-menu" id="mega-menu">
+            <button class="menu-toggle">📂 Categories</button>
+            <div class="menu-panel">
+                <div class="category-links">
+                    <strong>Education</strong>
+                    <ul>
+                        <li><a href="#">Courses</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Certificates</a></li>
+                    </ul>
+                </div>
+                <div class="category-links">
+                    <strong>Tools</strong>
+                    <ul>
+                        <li><a href="#">Builders</a></li>
+                        <li><a href="#">Converters</a></li>
+                        <li><a href="#">Generators</a></li>
+                    </ul>
+                </div>
+                <div class="category-links">
+                    <strong>Community</strong>
+                    <ul>
+                        <li><a href="#">Forums</a></li>
+                        <li><a href="#">Events</a></li>
+                        <li><a href="#">Chat</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <strong>💡 Best Practice:</strong> Mega menus are great for sites with lots of content. Keep them simple and organized with clear categories.
+        </div>
+    </section>
+
+    <!-- Section 4: Multi-Select Dropdown -->
+    <section class="dropdown-demo">
+        <h3>Multi-Select Dropdown</h3>
+        <p>Allow users to pick multiple items from a list. Ideal for filters, tags, and preference settings.</p>
+        
+        <div class="demo-container multi-select-wrapper" id="multi-select-demo">
+            <div class="custom-dropdown multi-select-trigger" tabindex="0" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Select multiple fruits" title="Select multiple fruits">
+                <span class="selected-value">Choose fruits...</span>
+                <span class="arrow">&#9662;</span>
+            </div>
+            <div class="dropdown-menu multi-select-menu" role="listbox" aria-multiselectable="true" aria-label="Fruit selection options">
+                <div class="multi-select-option"><input type="checkbox" id="ms-apple" data-value="apple" role="option" aria-selected="false"> <label for="ms-apple">Apple 🍎</label></div>
+                <div class="multi-select-option"><input type="checkbox" id="ms-banana" data-value="banana" role="option" aria-selected="false"> <label for="ms-banana">Banana 🍌</label></div>
+                <div class="multi-select-option"><input type="checkbox" id="ms-cherry" data-value="cherry" role="option" aria-selected="false"> <label for="ms-cherry">Cherry 🍒</label></div>
+                <div class="multi-select-option"><input type="checkbox" id="ms-date" data-value="date" role="option" aria-selected="false"> <label for="ms-date">Date 📅</label></div>
+                <div class="multi-select-option"><input type="checkbox" id="ms-grape" data-value="grape" role="option" aria-selected="false"> <label for="ms-grape">Grape 🍇</label></div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <strong>💡 Best Practice:</strong> Multi-select dropdowns are ideal when users need to choose multiple items. Always show selected values clearly and provide a way to deselect individual options or clear all selections. Use checkboxes within the dropdown for clarity.
+        </div>
+    </section>
+
+    <!-- Section 5: Searchable Dropdown -->
+    <section class="dropdown-demo">
+        <h3>Searchable Dropdown</h3>
+        <p>When your option list grows beyond 10 items, add search functionality to improve usability and reduce scroll fatigue.</p>
+        
+        <div class="demo-container searchable-dropdown no-radius" id="searchable-select">
+            <label class="demo-label">Select a fruit:</label>
+            <input type="text" class="search-input" placeholder="Search options..." aria-label="Search options">
+            <div class="custom-select-trigger-wrapper">
+                <div class="custom-select-trigger" role="combobox" aria-expanded="false" aria-haspopup="listbox" tabindex="0">
+                    <span class="selected-value">-- Select an option --</span>
+                    <span class="arrow">&#9662;</span>
+                </div>
+                <div class="custom-select-menu" role="listbox" aria-label="Fruit options">
+                    <div class="custom-select-option" data-value="" data-text="-- Select an option --">-- Select an option --</div>
+                    <div class="custom-select-option" data-value="apple" data-text="Apple">Apple</div>
+                    <div class="custom-select-option" data-value="apricot" data-text="Apricot">Apricot</div>
+                    <div class="custom-select-option" data-value="avocado" data-text="Avocado">Avocado</div>
+                    <div class="custom-select-option" data-value="banana" data-text="Banana">Banana</div>
+                    <div class="custom-select-option" data-value="blackberry" data-text="Blackberry">Blackberry</div>
+                    <div class="custom-select-option" data-value="blueberry" data-text="Blueberry">Blueberry</div>
+                    <div class="custom-select-option" data-value="cherry" data-text="Cherry">Cherry</div>
+                    <div class="custom-select-option" data-value="coconut" data-text="Coconut">Coconut</div>
+                    <div class="custom-select-option" data-value="cranberry" data-text="Cranberry">Cranberry</div>
+                    <div class="custom-select-option" data-value="date" data-text="Date">Date</div>
+                    <div class="custom-select-option" data-value="dragonfruit" data-text="Dragon Fruit">Dragon Fruit</div>
+                    <div class="custom-select-option" data-value="durian" data-text="Durian">Durian</div>
+                    <div class="custom-select-option" data-value="fig" data-text="Fig">Fig</div>
+                    <div class="custom-select-option" data-value="grape" data-text="Grape">Grape</div>
+                    <div class="custom-select-option" data-value="grapefruit" data-text="Grapefruit">Grapefruit</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <strong>💡 Best Practice:</strong> For long lists, searchable dropdowns improve usability. Always show the search results count when filtering.
+        </div>
+    </section>
+
+    <!-- Education Demos JavaScript -->
+    <script>
+    // Custom Dropdown Implementation
+    (function() {
+        const trigger = document.getElementById('custom-select-trigger');
+        const menu = document.getElementById('custom-select-menu');
+        
+        if (trigger && menu) {
+            let isOpen = false;
+            
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isOpen = !isOpen;
+                menu.classList.toggle('active', isOpen);
+                trigger.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
+            });
+            
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!trigger.contains(e.target)) {
+                    isOpen = false;
+                    menu.classList.remove('active');
+                    trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
+                }
+            });
+            
+            // Handle item selection
+            const items = menu.querySelectorAll('.dropdown-item');
+            items.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    trigger.querySelector('.selected-value').textContent = this.textContent;
+                    isOpen = false;
+                    menu.classList.remove('active');
+                    trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
+                    
+                    // Visual feedback
+                    trigger.style.borderColor = '#667eea';
+                    trigger.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
+                    setTimeout(() => {
+                        trigger.style.borderColor = '';
+                        trigger.style.boxShadow = '';
+                    }, 600);
+                    
+                    console.log('Selected:', value);
+                });
+            });
+        }
+    })();
+    
+    // Mega Menu Toggle
+    (function() {
+        const megaMenu = document.getElementById('mega-menu');
+        if (megaMenu) {
+            const toggleBtn = megaMenu.querySelector('.menu-toggle');
+            const menuPanel = megaMenu.querySelector('.menu-panel');
+            
+            if (toggleBtn && menuPanel) {
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isActive = menuPanel.classList.toggle('active');
+                    megaMenu.classList.toggle('open', isActive);
+                    toggleBtn.textContent = isActive ? '📂 Close Categories' : '📂 Categories';
+                });
+                
+                // Prevent links inside the menu from navigating/scrolling to top
+                menuPanel.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'A') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!megaMenu.contains(e.target)) {
+                        menuPanel.classList.remove('active');
+                        megaMenu.classList.remove('open');
+                        toggleBtn.textContent = '📂 Categories';
+                    }
+                });
+            }
+        }
+    })();
+    
+    // Searchable Dropdown
+    (function() {
+        const searchable = document.getElementById('searchable-select');
+        if (!searchable) return;
+        
+        const searchInput = searchable.querySelector('.search-input');
+        const trigger = searchable.querySelector('.custom-select-trigger');
+        const menu = searchable.querySelector('.custom-select-menu');
+        const selectedValue = searchable.querySelector('.selected-value');
+        const options = searchable.querySelectorAll('.custom-select-option');
+        
+        let isOpen = false;
+        let selectedOption = null;
+        
+        // Toggle dropdown
+        function toggleDropdown() {
+            isOpen = !isOpen;
+            
+            if (isOpen) {
+                menu.classList.add('active');
+                searchable.classList.add('dropdown-open');
+            } else {
+                menu.classList.remove('active');
+                searchable.classList.remove('dropdown-open');
+            }
+            
+            trigger.setAttribute('aria-expanded', isOpen.toString());
+            trigger.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
+            
+            if (isOpen) {
+                searchInput.focus();
+                filterOptions(searchInput.value.toLowerCase());
+            }
+        }
+        
+        // Filter options based on search
+        function filterOptions(searchTerm) {
+            let visibleCount = 0;
+            
+            options.forEach(function(option) {
+                const text = option.getAttribute('data-text').toLowerCase();
+                if (text.includes(searchTerm)) {
+                    option.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            searchInput.placeholder = visibleCount > 0 
+                ? `${visibleCount} result${visibleCount > 1 ? 's' : ''} found` 
+                : 'No results found';
+        }
+        
+        // Select option
+        function selectOption(option) {
+            // Remove previous selection
+            if (selectedOption) {
+                selectedOption.classList.remove('selected');
+            }
+            
+            selectedOption = option;
+            selectedValue.textContent = option.getAttribute('data-text');
+            selectedValue.style.fontWeight = '600';
+            
+            // Update trigger styling
+            trigger.style.borderColor = '#667eea';
+            trigger.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
+            
+            // Close dropdown
+            isOpen = false;
+            menu.classList.remove('active');
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
+            
+            // Reset search
+            searchInput.value = '';
+            searchInput.placeholder = 'Search options...';
+            filterOptions('');
+        }
+        
+        // Event listeners
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleDropdown();
+        });
+        
+        searchInput.addEventListener('input', function(e) {
+            filterOptions(e.target.value.toLowerCase());
+        });
+        
+        options.forEach(function(option) {
+            option.addEventListener('click', function() {
+                selectOption(this);
+            });
+        });
+        
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            if (!searchable.contains(e.target) && isOpen) {
+                isOpen = false;
+                menu.classList.remove('active');
+                trigger.setAttribute('aria-expanded', 'false');
+                trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
+            }
+        });
+        
+        // Keyboard support
+        trigger.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleDropdown();
+            } else if (e.key === 'Escape' && isOpen) {
+                isOpen = false;
+                menu.classList.remove('active');
+                trigger.setAttribute('aria-expanded', 'false');
+                trigger.querySelector('.arrow').style.transform = 'translateY(-50%)';
+            }
+        });
+    })();
+    
+    // Basic Select Feedback
+    (function() {
+        const basicSelect = document.getElementById('basic-select');
+        if (basicSelect) {
+            basicSelect.addEventListener('change', function(e) {
+                const value = e.target.value;
+                if (value) {
+                    // Visual feedback
+                    this.style.borderColor = '#667eea';
+                    this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
+                    setTimeout(() => {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    }, 600);
+                    console.log('Basic select changed to:', value);
+                }
+            });
+        }
+    })();
+    
+    // Multi-Select Dropdown
+    (function() {
+        const trigger = document.getElementById('multi-select-demo');
+        if (!trigger) return;
+        
+        const dropdown = trigger.querySelector('.multi-select-trigger');
+        const menu = trigger.querySelector('.multi-select-menu');
+        const selectedDisplay = dropdown.querySelector('.selected-value');
+        let isOpen = false;
+        
+        function updateSelectedText() {
+            const checkedItems = menu.querySelectorAll('input[type="checkbox"]:checked');
+            if (checkedItems.length === 0) {
+                selectedDisplay.textContent = 'Choose fruits...';
+                dropdown.style.borderColor = '';
+                dropdown.style.boxShadow = '';
+            } else {
+                selectedDisplay.textContent = Array.from(checkedItems).map(cb => cb.nextElementSibling.textContent.trim()).join(', ');
+                dropdown.style.borderColor = '#667eea';
+                dropdown.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.15)';
+            }
+        }
+        
+        dropdown.addEventListener('click', function(e) {
+            if (e.target.type === 'checkbox' || e.target.tagName === 'LABEL') return;
+            e.preventDefault();
+            e.stopPropagation();
+            isOpen = !isOpen;
+            menu.classList.toggle('active', isOpen);
+            dropdown.setAttribute('aria-expanded', isOpen.toString());
+            dropdown.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
+        });
+        
+        // Keyboard support for combobox
+        dropdown.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                isOpen = !isOpen;
+                menu.classList.toggle('active', isOpen);
+                dropdown.setAttribute('aria-expanded', isOpen.toString());
+                dropdown.querySelector('.arrow').style.transform = isOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)';
+            } else if (e.key === 'Escape') {
+                isOpen = false;
+                menu.classList.remove('active');
+                dropdown.setAttribute('aria-expanded', 'false');
+                dropdown.querySelector('.arrow').style.transform = 'translateY(-50%)';
+            }
+        });
+        
+        // Close when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!trigger.contains(e.target)) {
+                isOpen = false;
+                menu.classList.remove('active');
+                dropdown.setAttribute('aria-expanded', 'false');
+                dropdown.querySelector('.arrow').style.transform = 'translateY(-50%)';
+            }
+        });
+        
+        // Handle checkbox changes and aria-selected updates
+        const checkboxes = menu.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                this.setAttribute('aria-selected', this.checked.toString());
+                updateSelectedText();
+            });
+            
+            // Allow clicking the option div to toggle the checkbox
+            var optionDiv = checkbox.parentElement;
+            if (optionDiv) {
+                optionDiv.addEventListener('click', function(e) {
+                    if (e.target.type === 'checkbox') return; // Let the checkbox handle its own click
+                    e.preventDefault();
+                    e.stopPropagation();
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                });
+            }
+        });
+    })();
+    </script>

@@ -1,0 +1,20 @@
+- Goal
+  - Worlds #1 Drop Down site
+- Use drop downs at the top of the page to select the modes below
+- Modes
+  - Education
+    - Show how EVERY drop down works
+    - Drop down best practices
+    - Create a new, never before seen drop down?
+  - Games
+    - Find the path
+      - Hide a path through drop downs that must be discovered by the player
+      - Advanced mode where the drop downs are moving while the player tries to click them
+    - Hacker
+      - Hide things, force the player to use site inspector, view source, and console to figure out a puzzle
+    - Lazy drop down
+      - Idle drop down game
+        - Not sure what this even means?
+  - 1999
+    - Obnoxious mode
+      - Marquee, blink, bright colors, white background, etc

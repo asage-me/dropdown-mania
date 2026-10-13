@@ -1,0 +1,91 @@
+/* ============================================
+   NAVIGATION — Minimal institutional bar
+   Mode selector styled as a catalog entry.
+   (Styles also in main.css for home page.)
+   ============================================ */
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+    padding: 0 32px;
+    height: 56px;
+}
+
+.site-title {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+}
+
+.site-title span {
+    color: var(--accent-green);
+    font-weight: 400;
+}
+
+.mode-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mode-label {
+    font-family: var(--font-meta);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+}
+
+.theme-toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    color: var(--muted);
+}
+
+.theme-toggle-btn:hover {
+    color: var(--text-primary);
+}
+
+.mode-dropdown {
+    font-family: var(--font-meta);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 28px 6px 10px;
+    border: none;
+    border-bottom: 1px solid #3A3A3A;
+    background-color: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%236B6B6B' stroke-width='1.2'/%3E%3C/svg%3E") no-repeat right 10px center;
+}
+
+.mode-dropdown:focus {
+    outline: none;
+    border-bottom-color: var(--accent-green);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .mode-dropdown {
+    color: var(--text-secondary);
+    background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%238A8A8A' stroke-width='1.2'/%3E%3C/svg%3E") no-repeat right 10px center;
+}
+
+[data-theme="dark"] .mode-dropdown:focus {
+    border-bottom-color: var(--accent-green);
+    color: var(--text-primary);
+}

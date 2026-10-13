@@ -1,0 +1,1 @@
+Think step-by-step, but keep your reasoning brief. Output your answer immediately after your reasoning. Do not repeat your plan. End your response with a clear conclusion.

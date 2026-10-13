@@ -1,0 +1,13 @@
+# Developer Environment Rules
+
+## Operating System
+- Development is done on **Windows 11**
+
+## Terminal/Shell
+- Primary terminal: **PowerShell 7**
+- Do not use Linux commands or Unix-style syntax
+
+## Command Guidelines
+- Use PowerShell cmdlets and syntax
+- Avoid bash/shell scripts that rely on Linux utilities
+- If shell commands are needed, use PowerShell equivalents

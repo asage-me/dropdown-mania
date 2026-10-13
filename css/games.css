@@ -1,0 +1,239 @@
+/* ============================================
+   GAMES PAGE — Archive Exhibition Catalog
+   Games are presented as "exhibits" in the archive.
+   Selector is a navigation breadcrumb, not tabs.
+   ============================================ */
+
+.game-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--archive-warm);
+    padding-bottom: 0;
+}
+
+.game-section { display: none; }
+.game-section.active { display: block; }
+
+.game-btn {
+    font-family: var(--meta-font);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 12px 24px;
+    border-radius: 0;
+    border: none;
+    background-color: transparent;
+    color: var(--meta-color);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    position: relative;
+    font-weight: 500;
+}
+
+.game-btn.active {
+    color: var(--archive-blue);
+}
+
+.game-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 24px;
+    right: 24px;
+    height: 2px;
+    background-color: var(--archive-blue);
+}
+
+.game-btn:hover:not(.active) {
+    color: var(--text-color);
+    background-color: transparent;
+}
+
+/* Hacker UI — archival terminal aesthetic */
+.hacker-ui {
+    text-align: center;
+    padding: 40px;
+    background-color: var(--hacker-bg);
+    color: var(--hacker-text);
+    border-radius: 0;
+    box-shadow: var(--hacker-shadow);
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.hacker-ui label { 
+    display: block; 
+    margin-bottom: 1rem; 
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.hacker-ui input {
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 0;
+    text-align: center;
+    width: 300px;
+    background-color: var(--hacker-input-bg);
+    border: 1px solid var(--hacker-input-border);
+    color: var(--hacker-text);
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.hacker-ui input:focus {
+    outline: none;
+    box-shadow: 0 0 10px var(--hacker-input-border);
+}
+
+.idle-game-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 30px;
+    background-color: var(--info-bg);
+    padding: 20px;
+    border-radius: 0;
+}
+
+.score-display { 
+    font-family: var(--meta-font);
+    font-size: 1.8rem; 
+    font-weight: 700; 
+    color: var(--archive-blue); 
+}
+
+.stats-display { 
+    font-family: var(--meta-font);
+    font-size: 0.8rem; 
+    color: var(--text-light);
+    background: transparent;
+    padding: 4px 12px;
+    border-radius: 0;
+    border-left: 2px solid var(--archive-warm);
+}
+
+.main-dropdown-container {
+    text-align: center;
+    padding: 30px;
+}
+
+.upgrades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+#auth-result {
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* Tier-specific sizing - scale the select element and its font size */
+.custom-dropdown {
+    padding: 8px;
+    border-radius: 4px;
+    border: 2px solid #4a90d6;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .custom-dropdown {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+/* Tier-specific sizing */
+.tier-1 .custom-dropdown { width: 200px; font-size: 16px; }
+.tier-2 .custom-dropdown { width: 150px; font-size: 12px; }
+.tier-3 .custom-dropdown { width: 100px; font-size: 8px; }
+.tier-4 .custom-dropdown { width: 50px; font-size: 4px; }
+
+/* Custom dropdown (div-based) styling */
+.custom-dropdown-wrapper {
+    display: inline-block;
+    margin: 10px;
+    text-align: center;
+}
+
+.custom-select-display {
+    border: 2px solid #4a90d6;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.custom-select-display:hover {
+    background-color: #f0f0f0;
+}
+
+[data-theme="dark"] .custom-select-display {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .custom-select-display:hover {
+    background-color: var(--card-hover-bg);
+}
+
+.custom-options-list {
+    border: 2px solid #4a90d6;
+    border-radius: 4px;
+    background-color: white;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.custom-option-item {
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    box-sizing: border-box;
+    color: inherit;
+}
+
+.custom-option-item:last-child {
+    border-bottom: none;
+}
+
+.custom-option-item:hover {
+    background-color: #e8f4fc;
+}
+
+[data-theme="dark"] .custom-options-list {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .custom-option-item {
+    border-bottom-color: #3A3A3A;
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .custom-option-item:hover {
+    background-color: var(--card-hover-bg);
+}
+
+/* Tier movement for tier 5+ */
+.tier-move {
+    animation: moveTier5 3s infinite ease-in-out;
+    font-size: 16px;
+}
+
+@keyframes moveTier5 {
+    0% { transform: translateX(0); }
+    49% { transform: translateX(120px); }
+    51% { transform: translateX(120px); }
+    100% { transform: translateX(0); }
+}
+
+/* Lazy Drop game section titles */
+.lazy-game-title {
+    margin-top: 20px;
+}
