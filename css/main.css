@@ -125,28 +125,14 @@
 	margin-bottom: clamp(30px, 5vw, 46px);
 }
 
+/* Trigger chrome, hover/open ring and caret come from select.css, where every
+   dropdown in the archive shares them. Only the drawer's own proportions. */
 .drawer__trigger {
-	display: flex;
-	align-items: center;
 	gap: 14px;
 	width: 100%;
 	padding: 16px 18px;
 	font-family: var(--font-body);
 	font-size: 1.05rem;
-	text-align: left;
-	color: var(--text);
-	background: var(--panel-raised);
-	border: 1px solid var(--border-strong);
-	border-radius: var(--radius);
-	cursor: pointer;
-	transition: border-color var(--t-fast), box-shadow var(--t-fast);
-}
-
-.drawer__trigger:hover { border-color: var(--accent); }
-
-.drawer.is-open .drawer__trigger {
-	border-color: var(--accent);
-	box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .drawer__code {
@@ -164,18 +150,6 @@
 }
 
 .drawer__value { flex: 1; }
-
-.drawer__caret {
-	width: 9px;
-	height: 9px;
-	flex: none;
-	border-right: 1.5px solid currentColor;
-	border-bottom: 1.5px solid currentColor;
-	transform: translateY(-2px) rotate(45deg);
-	transition: transform var(--t-med) var(--ease-unfold);
-}
-
-.drawer.is-open .drawer__caret { transform: translateY(2px) rotate(-135deg); }
 
 .drawer__list {
 	position: absolute;

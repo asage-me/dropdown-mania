@@ -11,16 +11,15 @@
 	max-width: 100%;
 }
 
-.sel__trigger {
+/* Every dropdown in the archive wears the same trigger: the upgraded native
+   select (.sel), the hand-authored listbox (.pick) and the home-page drawer
+   (.drawer). Their shared chrome is declared once here and varied per
+   component below, so a change to the house style is one edit, not three. */
+.sel__trigger,
+.pick__trigger,
+.drawer__trigger {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 14px;
-	min-width: 220px;
-	padding: 11px 14px;
-	font-family: var(--font-mono);
-	font-size: 0.78rem;
-	letter-spacing: 0.04em;
 	text-align: left;
 	color: var(--text);
 	background: var(--panel-raised);
@@ -30,21 +29,36 @@
 	transition: border-color var(--t-fast), box-shadow var(--t-fast);
 }
 
-.sel__trigger:hover { border-color: var(--accent); }
+.sel__trigger:hover,
+.pick__trigger:hover,
+.drawer__trigger:hover { border-color: var(--accent); }
 
-.sel.is-open .sel__trigger {
+.sel.is-open .sel__trigger,
+.pick.is-open .pick__trigger,
+.drawer.is-open .drawer__trigger {
 	border-color: var(--accent);
 	box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.sel__trigger {
+	justify-content: space-between;
+	gap: 14px;
+	min-width: 220px;
+	padding: 11px 14px;
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	letter-spacing: 0.04em;
 }
 
 .sel__value { flex: 1; }
 
 .sel__value.is-placeholder { color: var(--text-faint); }
 
-.sel__caret {
-	position: relative;
-	width: 9px;
-	height: 9px;
+/* The caret is a folded corner: two borders rotated 45deg, flipping to -135deg
+   when its owner opens. Same shape everywhere, only the size differs. */
+.sel__caret,
+.pick__caret,
+.drawer__caret {
 	flex: none;
 	border-right: 1.5px solid currentColor;
 	border-bottom: 1.5px solid currentColor;
@@ -52,15 +66,27 @@
 	transition: transform var(--t-med) var(--ease-unfold);
 }
 
-.sel.is-open .sel__caret { transform: translateY(2px) rotate(-135deg); }
+.sel__caret,
+.drawer__caret { width: 9px; height: 9px; }
 
-.sel__menu {
+.sel__caret { position: relative; }
+
+.sel.is-open .sel__caret,
+.pick.is-open .pick__caret,
+.mega.is-open .pick__caret,
+.drawer.is-open .pick__caret,
+.drawer.is-open .drawer__caret { transform: translateY(2px) rotate(-135deg); }
+
+/* One unfold panel for the select and both hand-authored lists; only the
+   height budget differs (.drawer__list is deliberately its own shape). */
+.sel__menu,
+.pick__list,
+.combo__list {
 	position: absolute;
 	z-index: 60;
 	top: calc(100% + 5px);
 	left: 0;
 	min-width: 100%;
-	max-height: 290px;
 	overflow-y: auto;
 	padding: 5px;
 	background: var(--panel-raised);
@@ -70,6 +96,8 @@
 	transform-origin: top left;
 	animation: unfold var(--t-med) var(--ease-unfold) both;
 }
+
+.sel__menu { max-height: 290px; }
 
 .sel__option {
 	padding: 9px 11px;
@@ -163,63 +191,23 @@
 .pick { position: relative; display: inline-block; max-width: 100%; }
 
 .pick__trigger {
-	display: flex;
-	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
 	min-width: min(320px, 100%);
 	padding: 13px 16px;
 	font-family: var(--font-body);
 	font-size: 1rem;
-	text-align: left;
-	color: var(--text);
-	background: var(--panel-raised);
-	border: 1px solid var(--border-strong);
-	border-radius: var(--radius);
-	cursor: pointer;
-	transition: border-color var(--t-fast), box-shadow var(--t-fast);
-}
-
-.pick__trigger:hover { border-color: var(--accent); }
-
-.pick.is-open .pick__trigger {
-	border-color: var(--accent);
-	box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .pick__value { flex: 1; }
 
-.pick__caret {
-	width: 8px;
-	height: 8px;
-	flex: none;
-	border-right: 1.5px solid currentColor;
-	border-bottom: 1.5px solid currentColor;
-	transform: translateY(-2px) rotate(45deg);
-	transition: transform var(--t-med) var(--ease-unfold);
-}
+.pick__caret { width: 8px; height: 8px; }
 
-.pick.is-open .pick__caret,
-.mega.is-open .pick__caret,
-.drawer.is-open .pick__caret { transform: translateY(2px) rotate(-135deg); }
-
+/* Both lists are <ul>, so they shed the bullets the .sel div never had. */
 .pick__list,
 .combo__list {
-	position: absolute;
-	z-index: 60;
-	top: calc(100% + 5px);
-	left: 0;
-	min-width: 100%;
 	max-height: 300px;
-	overflow-y: auto;
-	padding: 5px;
 	list-style: none;
-	background: var(--panel-raised);
-	border: 1px solid var(--border-strong);
-	border-radius: var(--radius);
-	box-shadow: var(--shadow-pop);
-	transform-origin: top left;
-	animation: unfold var(--t-med) var(--ease-unfold) both;
 }
 
 .pick__item {
