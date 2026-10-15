@@ -6,14 +6,32 @@
  * rendered at 60px wide with a 5px font — unreadable, and a keyboard trap.
  * Tiers are now native <select> elements upgraded by ArchiveSelect, sized with
  * a legible scale, and every colour comes from the token system.
+ *
+ * Six tiers follow the "smaller and richer" ladder, each with one starred option
+ * that pays five times its own listing. Tier 7, the Long Menu, abandons the
+ * ladder for a lottery: 500 rows, one of which pays 5,000.
  */
 
-import { destroySelectsIn, enhanceSelects } from "../ui/select.js";
+import { destroySelectsIn, enhanceSelects, refreshSelect } from "../ui/select.js";
 import { load, save } from "../lib/store.js";
 
 const STORE_KEY = "lazy-drop";
 const SAVE_VERSION = 2;
-const MAX_TIERS = 6;
+const MAX_TIERS = 7;
+
+/* Tier 7 deliberately breaks the "smaller and richer" ladder: it is not
+   narrower, it is longer. Scale 1 keeps it full width. */
+const TIER_SCALE = [1, 0.86, 0.74, 0.64, 0.56, 0.5, 1];
+const TIER_BASE = [10, 25, 60, 140, 320, 700, 1200];
+const LONG_MENU_TIER = 7;
+const LONG_MENU_ROWS = 500;
+const LONG_MENU_PRIZE = 5000;
+const LONG_MENU_MISS = 5;
+
+/** Listed value of each option, as a multiple of the tier base. */
+const OPTION_STEPS = [1, 2, 3];
+/** The starred option pays this multiple of its own listed value. */
+const STAR_PAYOUT = 5;
 
 const DEFAULTS = {
 	version: SAVE_VERSION,
@@ -27,12 +45,10 @@ const DEFAULTS = {
 	tierCost: 1000,
 	multiplierCost: 5000,
 	selections: 0,
+	jackpots: 0,
 	log: [],
 	lastSeen: Date.now(),
 };
-
-const TIER_SCALE = [1, 0.86, 0.74, 0.64, 0.56, 0.5];
-const TIER_BASE = [10, 25, 60, 140, 320, 700];
 
 const UPGRADES = [
 	{
@@ -58,7 +74,7 @@ const UPGRADES = [
 	{
 		id: "tier",
 		name: "New tier",
-		note: "One more menu, smaller and far richer",
+		note: "One more menu, smaller and richer — the last is 500 rows long",
 		costOf: (s) => s.tierCost,
 		apply(s) {
 			s.tiers = Math.min(MAX_TIERS, s.tiers + 1);
@@ -137,45 +153,124 @@ export default {
 
 		/* ---------- tiers ---------- */
 
+		function tierShell(tier, { long = false } = {}) {
+			const wrapper = document.createElement("div");
+			wrapper.className = long ? "tier tier--long" : "tier";
+			wrapper.style.setProperty("--tier-scale", String(TIER_SCALE[tier - 1] ?? 0.5));
+			wrapper.style.setProperty("--tier-index", String(tier));
+			return wrapper;
+		}
+
+		/**
+		 * One option in every menu carries the star and pays five times its own
+		 * listed value. The star used to be painted onto a random option while the
+		 * five-fold was baked into the third choice's number, so the hint lied
+		 * about two thirds of the time and the star was pure decoration. The payout
+		 * is now derived from whichever option is starred, and the star is re-drawn
+		 * after every commit so the menu has to be opened again to be read again.
+		 */
+		function rollChoices(tier) {
+			const base = TIER_BASE[tier - 1] ?? TIER_BASE[TIER_BASE.length - 1];
+			const starred = Math.floor(Math.random() * OPTION_STEPS.length);
+			return OPTION_STEPS.map((step, index) => {
+				const listed = Math.round(base * step);
+				if (index !== starred) return { label: `Option ${index + 1} · +${number.format(listed)}`, payout: listed };
+				const payout = listed * STAR_PAYOUT;
+				return {
+					label: `Option ${index + 1} · +${number.format(listed)} ✦ ×${STAR_PAYOUT} = ${number.format(payout)}`,
+					payout,
+				};
+			});
+		}
+
+		function paintChoices(select, choices) {
+			select.innerHTML = "";
+			select.append(new Option("Commit…", ""));
+			choices.forEach((choice) => select.append(new Option(choice.label, String(choice.payout))));
+			// The widget mirrors the native element, so it has to be told the
+			// choices themselves changed — repainting the label would not be enough.
+			refreshSelect(select);
+		}
+
+		function buildShortMenu(tier) {
+			const wrapper = tierShell(tier);
+			const id = `ld-tier-${tier}`;
+			wrapper.innerHTML = `
+				<label class="tier__label" for="${id}">Tier ${tier}</label>
+				<select id="${id}" class="tier__select" data-select-variant="sel--game"></select>
+				<p class="tier__hint" aria-hidden="true">One option carries ✦ — it pays ${STAR_PAYOUT}× its own listing, and it moves after every commit.</p>`;
+
+			const select = wrapper.querySelector("select");
+			paintChoices(select, rollChoices(tier));
+			select.addEventListener("change", () => {
+				const points = Number(select.value);
+				if (!points) return;
+				bank(points * perSelection(), `Tier ${tier} selection`);
+				paintChoices(select, rollChoices(tier));
+				select.dispatchEvent(new Event("change", { bubbles: true }));
+			});
+			return wrapper;
+		}
+
+		/**
+		 * Tier 7 — the Long Menu. Five hundred rows, exactly one of which pays.
+		 *
+		 * The winning row lives only in this closure. Writing it into an option's
+		 * value or a data attribute would hand it straight to anyone who opens
+		 * devtools, on a site whose other game is literally about reading the page
+		 * source — so every row carries its own number as its value and the
+		 * comparison happens here.
+		 *
+		 * It is a lottery, not a puzzle: one row in five hundred, and a miss pays a
+		 * token. The prize stays put for the life of a ticket and a miss says only
+		 * whether it lies above or below, which is the smallest clue that turns 500
+		 * rows into a hunt you can actually work at — enough effort guarantees the
+		 * prize, while a single hopeful click still almost never gets it. Re-drawn
+		 * on a hit, so the next ticket is a fresh draw.
+		 */
+		function buildLongMenu() {
+			const wrapper = tierShell(LONG_MENU_TIER, { long: true });
+			const id = `ld-tier-${LONG_MENU_TIER}`;
+			wrapper.innerHTML = `
+				<label class="tier__label" for="${id}">Tier ${LONG_MENU_TIER} — The Long Menu</label>
+				<select id="${id}" class="tier__select" data-select-variant="sel--game"></select>
+				<p class="tier__hint" aria-hidden="true">${LONG_MENU_ROWS} rows, one prize of ${number.format(LONG_MENU_PRIZE)}. A miss only says whether the prize sits above or below — find it and the next ticket is drawn fresh.</p>`;
+
+			const select = wrapper.querySelector("select");
+			select.append(new Option("Draw…", ""));
+			for (let row = 1; row <= LONG_MENU_ROWS; row += 1) {
+				select.append(new Option(`Row ${String(row).padStart(3, "0")}`, String(row)));
+			}
+
+			const draw = () => 1 + Math.floor(Math.random() * LONG_MENU_ROWS);
+			let prize = draw();
+
+			select.addEventListener("change", () => {
+				const picked = Number(select.value);
+				if (!picked) return;
+				if (picked === prize) {
+					state.jackpots = (state.jackpots || 0) + 1;
+					bank(LONG_MENU_PRIZE * perSelection(), `The Long Menu — row ${picked} was the prize`);
+					api.unlock("lazy-jackpot");
+					prize = draw();
+				} else {
+					const where = prize > picked ? "below" : "above";
+					bank(LONG_MENU_MISS * perSelection(),
+						`The Long Menu — row ${picked} was empty, and the prize is somewhere ${where} from it`);
+				}
+				select.value = "";
+				select.dispatchEvent(new Event("change", { bubbles: true }));
+			});
+			return wrapper;
+		}
+
 		function buildTiers() {
 			// Rebuilding throws away the upgraded selects, so tear their widgets
 			// down first — otherwise each "New tier" purchase leaks a listener.
 			destroySelectsIn(tiersEl);
 			tiersEl.innerHTML = "";
 			for (let tier = 1; tier <= state.tiers; tier += 1) {
-				const scale = TIER_SCALE[tier - 1] ?? 0.5;
-				const base = TIER_BASE[tier - 1] ?? TIER_BASE[TIER_BASE.length - 1];
-				const wrapper = document.createElement("div");
-				wrapper.className = "tier";
-				wrapper.style.setProperty("--tier-scale", String(scale));
-				wrapper.style.setProperty("--tier-index", String(tier));
-
-				const rareIndex = 1 + Math.floor(Math.random() * 3);
-				const choices = [1, 2, 3].map((n) => ({
-					n,
-					points: Math.round(base * [1, 2.5, 5][n - 1]),
-					rare: n === rareIndex,
-				}));
-
-				const id = `ld-tier-${tier}`;
-				wrapper.innerHTML = `
-					<label class="tier__label" for="${id}">Tier ${tier}</label>
-					<select id="${id}" class="tier__select" data-select-variant="sel--game">
-						<option value="">Commit…</option>
-						${choices.map((choice) => `<option value="${choice.points}">Option ${choice.n} · +${number.format(choice.points)}${choice.rare ? " ✦" : ""}</option>`).join("")}
-					</select>
-					<p class="tier__hint" aria-hidden="true">One option carries ✦ — worth 5×</p>`;
-
-				const select = wrapper.querySelector("select");
-				select.addEventListener("change", () => {
-					const points = Number(select.value);
-					if (!points) return;
-					bank(points * perSelection(), `Tier ${tier} selection`);
-					select.value = "";
-					select.dispatchEvent(new Event("change", { bubbles: true }));
-				});
-
-				tiersEl.appendChild(wrapper);
+				tiersEl.appendChild(tier === LONG_MENU_TIER ? buildLongMenu() : buildShortMenu(tier));
 			}
 			enhanceSelects(tiersEl);
 		}

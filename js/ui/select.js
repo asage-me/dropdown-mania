@@ -86,15 +86,6 @@ class ArchiveSelect {
 	/* ---------- construction ---------- */
 
 	build() {
-		const options = Array.from(this.native.options).map((opt, index) => ({
-			index,
-			value: opt.value,
-			label: opt.textContent.trim(),
-			disabled: opt.disabled,
-			group: opt.parentElement?.tagName === "OPTGROUP" ? opt.parentElement.label : "",
-		}));
-
-		this.options = options;
 		this.menuId = nextId("archive-select-listbox");
 
 		const root = document.createElement("div");
@@ -126,7 +117,41 @@ class ArchiveSelect {
 			|| labelFor(this.native);
 		if (label) listbox.setAttribute("aria-label", label);
 
-		this.items = options.map((opt) => {
+		this.root = root;
+		this.trigger = trigger;
+		this.valueEl = value;
+		this.listbox = listbox;
+		this.activeIndex = -1;
+
+		this.renderItems();
+
+		root.append(trigger, listbox);
+
+		this.native.style.setProperty("display", "none", "important");
+		this.native.setAttribute("aria-hidden", "true");
+		this.native.tabIndex = -1;
+		this.native.parentNode.insertBefore(root, this.native);
+
+		this.paint();
+	}
+
+	/**
+	 * Read the native options and rebuild the listbox to match. Kept apart from
+	 * build() so refreshOptions() can re-read a select whose choices were
+	 * rewritten after it was upgraded — Lazy Drop re-rolls which option carries
+	 * its bonus star, and the label has to stay truthful.
+	 */
+	renderItems() {
+		this.options = Array.from(this.native.options).map((opt, index) => ({
+			index,
+			value: opt.value,
+			label: opt.textContent.trim(),
+			disabled: opt.disabled,
+			group: opt.parentElement?.tagName === "OPTGROUP" ? opt.parentElement.label : "",
+		}));
+
+		this.listbox.innerHTML = "";
+		this.items = this.options.map((opt) => {
 			const item = document.createElement("div");
 			item.className = "sel__option";
 			item.setAttribute("role", "option");
@@ -143,23 +168,22 @@ class ArchiveSelect {
 				if (opt.disabled) return;
 				this.commit(opt.index);
 			});
-			listbox.appendChild(item);
+			this.listbox.appendChild(item);
 			return item;
 		});
+	}
 
-		root.append(trigger, listbox);
-		this.root = root;
-		this.trigger = trigger;
-		this.valueEl = value;
-		this.listbox = listbox;
-		this.activeIndex = -1;
-
-		this.native.style.setProperty("display", "none", "important");
-		this.native.setAttribute("aria-hidden", "true");
-		this.native.tabIndex = -1;
-		this.native.parentNode.insertBefore(root, this.native);
-
+	/**
+	 * Re-read the native element after application code replaced its options.
+	 * The native select stays the source of truth, so this only has to look at
+	 * it again — never keep a second copy of the choices in caller code.
+	 */
+	refreshOptions() {
+		const wasOpen = this.open;
+		this.close({ refocus: false });
+		this.renderItems();
 		this.paint();
+		if (wasOpen) this.openList();
 	}
 
 	bind() {
@@ -403,6 +427,15 @@ export function enhanceSelects(scope = document, { variant = "" } = {}) {
 /** Repaint the widget after application code changed select.value. */
 export function syncSelect(select) {
 	ArchiveSelect.of(select)?.paint();
+}
+
+/**
+ * Rebuild the widget after application code replaced the select's <option>
+ * elements. paint() would only refresh the chosen label; anything that changes
+ * the choices themselves has to be re-read.
+ */
+export function refreshSelect(select) {
+	ArchiveSelect.of(select)?.refreshOptions();
 }
 
 /**

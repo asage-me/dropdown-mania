@@ -416,6 +416,17 @@
 	color: var(--text-faint);
 }
 
+/* Tier 7 is the one tier that refuses to shrink: its whole idea is length, not
+   small print. It gets a full-width trigger and a taller panel so scanning
+   500 rows is a scroll rather than a treasure hunt inside 290px. */
+.tier--long {
+	--tier-trigger-w: 300px;
+}
+
+.tier--long .sel__menu {
+	max-height: min(420px, var(--menu-room, 100vh));
+}
+
 .upgrades { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); }
 
 .upgrade {
