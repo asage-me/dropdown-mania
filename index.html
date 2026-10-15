@@ -7,6 +7,25 @@
     <meta name="description" content="A catalogue of dropdown menus: their taxonomy, the games built from them, and the aesthetic they inherited from 1999.">
     <meta name="color-scheme" content="light dark">
 
+    <!-- The module that owns the theme is deferred, so it runs after first
+         paint: a visitor whose system prefers dark saw a light page flash
+         before going dark on every single load. This runs before the
+         stylesheets below, so the first paint is already the right theme.
+         The key and its JSON encoding must stay in sync with js/lib/store.js;
+         initTheme() still decides afterwards and re-applies if needed. -->
+    <script>
+        (function () {
+            try {
+                var stored = JSON.parse(localStorage.getItem("dropdown-archive:theme"));
+                var dark = stored === "dark"
+                    || (stored !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+                document.documentElement.dataset.theme = dark ? "dark" : "light";
+            } catch (e) {
+                /* private mode or disabled storage: initTheme() applies after paint */
+            }
+        })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap">
