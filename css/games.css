@@ -121,9 +121,11 @@
 	transition: border-color var(--t-med), background-color var(--t-med);
 }
 
+/* A solved row is a correct answer, and this wing's accent is red — so success
+   gets its own token rather than borrowing --accent and reading as an error. */
 .path__level.is-solved {
-	border-color: var(--accent);
-	background: var(--accent-soft);
+	border-color: var(--success);
+	background: var(--success-soft);
 }
 
 .path__index {
@@ -135,7 +137,7 @@
 	color: var(--border-strong);
 }
 
-.path__level.is-solved .path__index { color: var(--accent); }
+.path__level.is-solved .path__index { color: var(--success); }
 
 .path__prompt {
 	display: block;
@@ -153,7 +155,7 @@
 	min-height: 1.2em;
 }
 
-.path__verdict.is-right { color: var(--patina); }
+.path__verdict.is-right { color: var(--success); }
 .path__verdict.is-wrong { color: var(--rubric); }
 
 .path__notes {
@@ -192,7 +194,7 @@
 	margin-top: 26px;
 	padding: 22px 24px;
 	background: var(--panel);
-	border: 1px solid var(--accent);
+	border: 1px solid var(--success);
 	border-left-width: 4px;
 }
 
@@ -202,7 +204,7 @@
 	font-weight: 800;
 	font-stretch: 112%;
 	letter-spacing: -0.02em;
-	color: var(--accent);
+	color: var(--success);
 	margin-bottom: 6px;
 }
 
@@ -226,7 +228,7 @@
 	content: "—";
 	position: absolute;
 	left: 0;
-	color: var(--accent);
+	color: var(--success);
 }
 
 /* ---------- DD-013 Hacker ---------- */

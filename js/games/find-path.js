@@ -148,11 +148,16 @@ export default {
 			} else {
 				verdict.textContent = "Wrong — the board resets. Your notes keep what you solved.";
 				verdict.className = "path__verdict is-wrong";
-				resetBoard();
+				resetBoard({ keepVerdictOn: index });
 			}
 		}
 
-		function resetBoard() {
+		/**
+		 * Clear the run. The row that was just answered wrongly keeps its verdict:
+		 * the game's only contract is yes or no, and clearing the message in the
+		 * same tick that wrote it left "no" permanently invisible.
+		 */
+		function resetBoard({ keepVerdictOn = -1 } = {}) {
 			state.solved = [];
 			state.startedAt = 0;
 			state.elapsed = 0;
@@ -162,6 +167,7 @@ export default {
 				select.dispatchEvent(new Event("change", { bubbles: true }));
 				step.classList.remove("is-solved");
 				step.hidden = index > 0;
+				if (index === keepVerdictOn) return;
 				const verdict = step.querySelector("[data-verdict]");
 				verdict.textContent = "";
 				verdict.className = "path__verdict";

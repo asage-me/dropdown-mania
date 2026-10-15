@@ -64,6 +64,7 @@
     --cyanotype-soft: rgba(44, 92, 138, 0.12);
     --manila: #d9c79b;
     --patina: #3f7d6e;
+    --patina-soft: rgba(63, 125, 110, 0.14);
 
     /* Wing accent: what is interactive right now */
     --accent: var(--rubric);
@@ -80,6 +81,12 @@
     --border: var(--rule);
     --border-strong: var(--rule-strong);
     --focus: var(--accent);
+
+    /* "That was right", which is not the same fact as "that is interactive".
+       --accent is the wing's colour, and in the games wing it is rubric red —
+       so a solved row painted with --accent looks like a wrong answer. */
+    --success: var(--patina);
+    --success-soft: var(--patina-soft);
 
     /* --- Layout --- */
     --page-max: 1140px;
@@ -121,6 +128,7 @@
     --cyanotype-soft: rgba(127, 180, 229, 0.16);
     --manila: #c9b486;
     --patina: #6fc0a8;
+    --patina-soft: rgba(111, 192, 168, 0.16);
 
     --accent-ink: #12151a;
     --shadow-pop: 0 22px 46px -24px rgba(0, 0, 0, 0.9);
