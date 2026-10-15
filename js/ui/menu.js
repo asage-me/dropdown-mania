@@ -86,47 +86,36 @@ export function createMenu({ trigger, panel, itemSelector = "[data-menu-item]", 
 		}
 	}
 
+	// Same shape as ArchiveSelect: a table, so the handler stays a lookup. Tab is
+	// the only key left uncancelled, because focus has to be able to move on.
+	const OPEN_KEYS = new Map([
+		["ArrowDown", () => highlight(step(state.active, 1))],
+		["ArrowUp", () => highlight(step(state.active, -1))],
+		["Home", () => highlight(0)],
+		["End", () => highlight(items().length - 1)],
+		["Enter", () => commit(state.active)],
+		[" ", () => commit(state.active)],
+		["Escape", () => close({ refocus: true })],
+		["Tab", () => close()],
+	]);
+	const OPENING_KEYS = new Set(["ArrowDown", "ArrowUp", "Enter", " "]);
+
 	function onKey(event) {
 		if (!state.open) {
-			if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
-				event.preventDefault();
-				setOpen(true);
-				highlight(event.key === "ArrowUp" ? items().length - 1 : 0);
-			}
+			if (!OPENING_KEYS.has(event.key)) return;
+			event.preventDefault();
+			setOpen(true);
+			highlight(event.key === "ArrowUp" ? items().length - 1 : 0);
 			return;
 		}
-		switch (event.key) {
-			case "ArrowDown":
-				event.preventDefault();
-				highlight(step(state.active, 1));
-				break;
-			case "ArrowUp":
-				event.preventDefault();
-				highlight(step(state.active, -1));
-				break;
-			case "Home":
-				event.preventDefault();
-				highlight(0);
-				break;
-			case "End":
-				event.preventDefault();
-				highlight(items().length - 1);
-				break;
-			case "Enter":
-			case " ":
-				event.preventDefault();
-				commit(state.active);
-				break;
-			case "Escape":
-				event.preventDefault();
-				close({ refocus: true });
-				break;
-			case "Tab":
-				close();
-				break;
-			default:
-				if (PRINTABLE.test(event.key)) typeahead(event.key);
+
+		const action = OPEN_KEYS.get(event.key);
+		if (!action) {
+			if (PRINTABLE.test(event.key)) typeahead(event.key);
+			return;
 		}
+		if (event.key !== "Tab") event.preventDefault();
+		action();
 	}
 
 	function onTriggerClick(event) {

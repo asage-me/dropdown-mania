@@ -22,6 +22,27 @@ let idSeed = 0;
 
 const PRINTABLE = /^[a-z0-9!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-]$/i;
 
+/**
+ * Keys while the listbox is open. A table rather than a switch keeps the
+ * handler a lookup and leaves the contract in the header comment readable at a
+ * glance. A Map, not an object, because the key comes from whatever the visitor
+ * types and must never reach Object.prototype.
+ */
+const OPEN_KEYS = new Map([
+	["ArrowDown", (sel) => sel.highlight(sel.step(sel.activeIndex, 1))],
+	["ArrowUp", (sel) => sel.highlight(sel.step(sel.activeIndex, -1))],
+	["Home", (sel) => sel.highlight(sel.firstEnabled())],
+	["End", (sel) => sel.highlight(sel.lastEnabled())],
+	["Enter", (sel) => (sel.activeIndex >= 0 ? sel.commit(sel.activeIndex) : sel.close())],
+	[" ", (sel) => (sel.activeIndex >= 0 ? sel.commit(sel.activeIndex) : sel.close())],
+	["Escape", (sel) => sel.close()],
+	// The one key that must not be cancelled: focus has to be allowed to leave.
+	["Tab", (sel) => sel.close({ refocus: false })],
+]);
+
+/** Keys that open a closed listbox. */
+const OPENING_KEYS = new Set(["ArrowDown", "ArrowUp", "Enter", " "]);
+
 function nextId(prefix) {
 	idSeed += 1;
 	return `${prefix}-${idSeed}`;
@@ -237,50 +258,21 @@ class ArchiveSelect {
 	/* ---------- keyboard ---------- */
 
 	handleTriggerKey(event) {
-		const key = event.key;
-
 		if (!this.open) {
-			if (key === "ArrowDown" || key === "ArrowUp" || key === "Enter" || key === " ") {
-				event.preventDefault();
-				this.openList();
-				if (key === "ArrowUp") this.highlight(this.lastEnabled());
-			}
+			if (!OPENING_KEYS.has(event.key)) return;
+			event.preventDefault();
+			this.openList();
+			if (event.key === "ArrowUp") this.highlight(this.lastEnabled());
 			return;
 		}
 
-		switch (key) {
-			case "ArrowDown":
-				event.preventDefault();
-				this.highlight(this.step(this.activeIndex, 1));
-				break;
-			case "ArrowUp":
-				event.preventDefault();
-				this.highlight(this.step(this.activeIndex, -1));
-				break;
-			case "Home":
-				event.preventDefault();
-				this.highlight(this.firstEnabled());
-				break;
-			case "End":
-				event.preventDefault();
-				this.highlight(this.lastEnabled());
-				break;
-			case "Enter":
-			case " ":
-				event.preventDefault();
-				if (this.activeIndex >= 0) this.commit(this.activeIndex);
-				else this.close();
-				break;
-			case "Escape":
-				event.preventDefault();
-				this.close();
-				break;
-			case "Tab":
-				this.close({ refocus: false });
-				break;
-			default:
-				if (PRINTABLE.test(key)) this.runTypeahead(key);
+		const action = OPEN_KEYS.get(event.key);
+		if (!action) {
+			if (PRINTABLE.test(event.key)) this.runTypeahead(event.key);
+			return;
 		}
+		if (event.key !== "Tab") event.preventDefault();
+		action(this);
 	}
 
 	runTypeahead(char) {

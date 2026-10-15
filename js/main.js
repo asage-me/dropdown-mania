@@ -64,18 +64,23 @@ initTheme();
 document.getElementById("theme-toggle")?.addEventListener("click", toggleTheme);
 
 /* ---------- palette keys ---------- */
+const isTyping = (el) => /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable;
+const plain = (event) =>
+	!event.ctrlKey && !event.metaKey && !event.altKey && !isTyping(event.target);
+
+// Ctrl/Cmd+K works even inside a field; the bare keys must never swallow typing
+// or shadow a browser shortcut, so they ask for an unmodified key press.
+const SHORTCUTS = [
+	{ when: (event) => (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k", run: () => palette.open() },
+	{ when: (event) => plain(event) && event.key === "/", run: () => palette.open() },
+	{ when: (event) => plain(event) && event.key.toLowerCase() === "r", run: () => openRecords() },
+];
+
 document.addEventListener("keydown", (event) => {
-	const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) || event.target.isContentEditable;
-	if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-		event.preventDefault();
-		palette.open();
-	} else if (event.key === "/" && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
-		event.preventDefault();
-		palette.open();
-	} else if (event.key.toLowerCase() === "r" && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
-		event.preventDefault();
-		openRecords();
-	}
+	const hit = SHORTCUTS.find((shortcut) => shortcut.when(event));
+	if (!hit) return;
+	event.preventDefault();
+	hit.run();
 });
 
 document.addEventListener("click", (event) => {
