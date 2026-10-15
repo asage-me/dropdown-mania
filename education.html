@@ -109,11 +109,11 @@
             </ul>
         </div>
         <ol class="anatomy__parts">
-            <li><span class="anatomy__n">1</span><strong>Trigger</strong> — a real button, with a name that says what you are choosing.</li>
-            <li><span class="anatomy__n">2</span><strong>Current value</strong> — rendered inside the trigger, so the choice survives closing.</li>
-            <li><span class="anatomy__n">3</span><strong>Indicator</strong> — rotates on open; decorative, always <code>aria-hidden</code>.</li>
-            <li><span class="anatomy__n">4</span><strong>Listbox</strong> — one item is <em>active</em> (highlighted) and one is <em>selected</em>. They are not the same thing.</li>
-            <li><span class="anatomy__n">5</span><strong>Commit</strong> — Enter, Space or click writes the value and closes. Escape closes without writing.</li>
+            <li><span class="anatomy__n">1</span><span class="anatomy__part"><strong>Trigger</strong> — a real button, with a name that says what you are choosing.</span></li>
+            <li><span class="anatomy__n">2</span><span class="anatomy__part"><strong>Current value</strong> — rendered inside the trigger, so the choice survives closing.</span></li>
+            <li><span class="anatomy__n">3</span><span class="anatomy__part"><strong>Indicator</strong> — rotates on open; decorative, always <code>aria-hidden</code>.</span></li>
+            <li><span class="anatomy__n">4</span><span class="anatomy__part"><strong>Listbox</strong> — one item is <em>active</em> (highlighted) and one is <em>selected</em>. They are not the same thing.</span></li>
+            <li><span class="anatomy__n">5</span><span class="anatomy__part"><strong>Commit</strong> — Enter, Space or click writes the value and closes. Escape closes without writing.</span></li>
         </ol>
     </div>
 
@@ -283,7 +283,7 @@
     <p>Put the mouse down. Focus the control, then work through the map. Every key below is
         implemented by both dropdown components in this archive, and the log shows what you pressed.</p>
 
-    <div class="demo demo--split">
+    <div class="demo demo--split demo--keyboard">
         <div class="keymap">
             <p class="label">The map</p>
             <dl class="keymap__list">
@@ -304,6 +304,8 @@
                 <option value="pencil">Pencil only near originals</option>
                 <option value="support">Book cradle, never force flat</option>
             </select>
+        </div>
+        <div>
             <p class="label keylog__title">Key log</p>
             <ul class="keylog" data-dd008-log aria-live="polite">
                 <li class="keylog__item keylog__item--empty">No keys yet.</li>
