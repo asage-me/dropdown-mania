@@ -160,9 +160,17 @@ export function createMenu({ trigger, panel, itemSelector = "[data-menu-item]", 
 		if (!el.getAttribute("role")) el.setAttribute("role", "option");
 	});
 
+	const setActive = highlight;
+
 	const api = {
 		close,
 		open() { Menu.closeAll(); setOpen(true); highlight(0); },
+		// Move the highlight without opening or committing, for callers that
+		// animate a list (the home intro). Ignored while closed: pointing
+		// aria-activedescendant at a hidden listbox is a lie to readers.
+		highlight(index) {
+			if (state.open) setActive(index);
+		},
 		isOpen: () => state.open,
 		destroy() {
 			close();

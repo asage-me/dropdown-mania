@@ -60,6 +60,10 @@ export default {
 				items.forEach((item, index) => {
 					timers.push(window.setTimeout(() => {
 						if (touched) return;
+						// The trigger text and the open list have to change
+						// together, or the intro reads as a broken keyboard
+						// highlight. close() clears it again at the end.
+						menu.highlight(index);
 						valueEl.textContent = item.querySelector(".drawer__name").textContent;
 						codeEl.textContent = item.querySelector(".drawer__code").textContent;
 					}, 420 + index * 520));
