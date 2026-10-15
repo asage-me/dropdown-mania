@@ -48,6 +48,14 @@ const LEVELS = [
 	},
 ];
 
+/* Advanced-mode drift. Each level gets a slightly longer cycle so the five
+ * menus never pulse in lockstep. DRIFT_SPEED divides them all — it is a speed
+ * multiplier, so 5 means "five times faster than the 3.2s reference" and the
+ * whole game is retuned in one place instead of five. */
+const DRIFT_BASE = 3.2;
+const DRIFT_STEP = 0.7;
+const DRIFT_SPEED = 5;
+
 const state = {
 	mode: "standard",
 	solved: [],
@@ -247,7 +255,8 @@ export default {
 			const moving = mode === "advanced" && !reduceMotion;
 			board.classList.toggle("is-moving", moving);
 			selects.forEach(({ step }, index) => {
-				step.style.setProperty("--drift-duration", `${3.2 + index * 0.7}s`);
+				const cycle = (DRIFT_BASE + index * DRIFT_STEP) / DRIFT_SPEED;
+				step.style.setProperty("--drift-duration", `${cycle.toFixed(2)}s`);
 				step.style.setProperty("--drift-x", `${(index % 2 === 0 ? 1 : -1) * (10 + index * 4)}px`);
 				step.style.setProperty("--drift-y", `${(index % 3 === 0 ? -1 : 1) * (6 + index * 3)}px`);
 			});

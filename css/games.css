@@ -167,7 +167,7 @@
 /* Advanced mode: the menus drift. Motion is opt-in via the difficulty switch
    and never applied under prefers-reduced-motion (handled in JS). */
 .path.is-moving .path__level {
-	animation: drift var(--drift-duration, 4s) ease-in-out infinite alternate;
+	animation: drift var(--drift-duration, 0.8s) ease-in-out infinite alternate;
 	will-change: transform;
 }
 
