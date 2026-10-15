@@ -56,7 +56,10 @@ export default {
 			if (reduceMotion.matches) return;
 			timers.push(window.setTimeout(() => {
 				if (touched) return;
-				menu.open();
+				// Open with nothing highlighted. Opening on option 1 meant the
+				// first beat of the cycle changed nothing on screen - the list
+				// looked stuck until the second wing.
+				menu.open(-1);
 				items.forEach((item, index) => {
 					timers.push(window.setTimeout(() => {
 						if (touched) return;

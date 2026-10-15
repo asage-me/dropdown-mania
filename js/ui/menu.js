@@ -65,6 +65,9 @@ export function createMenu({ trigger, panel, itemSelector = "[data-menu-item]", 
 
 	function step(from, direction) {
 		const list = items();
+		// Nothing is active yet (the intro opens unhighlighted). A listbox with no
+		// active option enters at the top going down and the bottom going up.
+		if (from < 0) return direction > 0 ? 0 : list.length - 1;
 		return (((from + direction) % list.length) + list.length) % list.length;
 	}
 
@@ -164,7 +167,14 @@ export function createMenu({ trigger, panel, itemSelector = "[data-menu-item]", 
 
 	const api = {
 		close,
-		open() { Menu.closeAll(); setOpen(true); highlight(0); },
+		// Pass -1 to open with nothing highlighted, for callers that move the
+		// highlight themselves. Pre-highlighting the first option would leave the
+		// first step of that animation with nothing visibly changing.
+		open(index = 0) {
+			Menu.closeAll();
+			setOpen(true);
+			if (index >= 0) highlight(index);
+		},
 		// Move the highlight without opening or committing, for callers that
 		// animate a list (the home intro). Ignored while closed: pointing
 		// aria-activedescendant at a hidden listbox is a lie to readers.
