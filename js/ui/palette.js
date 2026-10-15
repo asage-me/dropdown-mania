@@ -88,6 +88,9 @@ export function createPalette({ navigate }) {
 			empty.className = "palette__empty";
 			empty.textContent = `Nothing in the catalogue matches “${query}”.`;
 			results.appendChild(empty);
+			// The rows were just wiped above, so whatever id the input still points
+			// at no longer exists. A reader announces a phantom active option.
+			input.removeAttribute("aria-activedescendant");
 			return;
 		}
 		rows.forEach((entry, index) => {
@@ -103,7 +106,7 @@ export function createPalette({ navigate }) {
 			row.addEventListener("click", () => choose(index));
 			results.appendChild(row);
 		});
-		input.setAttribute("aria-activedescendant", rows.length ? `palette-row-0` : "");
+		input.setAttribute("aria-activedescendant", "palette-row-0");
 	}
 
 	function move(delta) {
