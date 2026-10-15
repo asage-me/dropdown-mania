@@ -97,7 +97,19 @@
 	animation: unfold var(--t-med) var(--ease-unfold) both;
 }
 
-.sel__menu { max-height: 290px; }
+/* The height budget is a custom property rather than a fixed max-height: a
+   menu whose trigger sits low in the viewport (or one that is drifting around
+   it, js/ui/float.js) has to shrink to the room actually left, and ArchiveSelect
+   writes --menu-room every frame while a menu is open. 290px stays the ceiling. */
+.sel__menu { max-height: min(290px, var(--menu-room, 100vh)); }
+
+/* No room below, more room above: unfold upwards instead of off the screen. */
+.sel__menu.is-up {
+	top: auto;
+	bottom: calc(100% + 5px);
+	transform-origin: bottom left;
+	animation-name: unfold-up;
+}
 
 .sel__option {
 	padding: 9px 11px;
@@ -133,6 +145,11 @@
 /* ---------- The unfold ---------- */
 @keyframes unfold {
 	from { opacity: 0; transform: perspective(700px) rotateX(-28deg) translateY(-6px); }
+	to   { opacity: 1; transform: perspective(700px) rotateX(0) translateY(0); }
+}
+
+@keyframes unfold-up {
+	from { opacity: 0; transform: perspective(700px) rotateX(28deg) translateY(6px); }
 	to   { opacity: 1; transform: perspective(700px) rotateX(0) translateY(0); }
 }
 

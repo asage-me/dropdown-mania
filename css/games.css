@@ -182,7 +182,9 @@
 	   little width is what buys the drift its horizontal range. */
 	width: min(560px, calc(100vw - 72px));
 	margin: 0;
-	z-index: 40; /* above the page, below the nav (100) and the overlays (300) */
+	/* Below the sticky header (100) on purpose: float.js measures that header and
+	   keeps every row underneath it, so nothing drifts behind the nav. */
+	z-index: 40;
 	will-change: transform;
 }
 

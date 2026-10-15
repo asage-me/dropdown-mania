@@ -48,6 +48,28 @@ function nextId(prefix) {
 	return `${prefix}-${idSeed}`;
 }
 
+/* ---------- keeping an open listbox on screen ---------- */
+
+/**
+ * A menu is anchored to its trigger, so a trigger low in the viewport — or one
+ * drifting around the viewport, which is exactly what Find the Path advanced
+ * does — would otherwise spill off the bottom of the screen and hide its own
+ * options. One loop serves every open menu and exists only while one is open,
+ * so a page at rest costs nothing.
+ */
+const MENU_GAP = 6;
+const MENU_MIN = 140; // never squeeze a menu into an unreadable sliver
+let alignFrame = 0;
+
+function alignAll() {
+	openSet.forEach((sel) => sel.alignMenu());
+	alignFrame = openSet.size ? requestAnimationFrame(alignAll) : 0;
+}
+
+function scheduleAlign() {
+	if (!alignFrame) alignFrame = requestAnimationFrame(alignAll);
+}
+
 class ArchiveSelect {
 	constructor(select, { variant = "" } = {}) {
 		this.native = select;
@@ -190,6 +212,9 @@ class ArchiveSelect {
 		this.listbox.hidden = false;
 		this.root.classList.add("is-open");
 		this.trigger.setAttribute("aria-expanded", "true");
+		// Placed before the first frame rather than on it, so a menu opening
+		// near the bottom of the screen never flashes at the wrong size.
+		this.alignMenu();
 		this.highlight(Math.max(this.selectedIndex, 0));
 	}
 
@@ -205,8 +230,32 @@ class ArchiveSelect {
 	}
 
 	openSetAdd(isOpen) {
-		if (isOpen) openSet.add(this);
-		else openSet.delete(this);
+		if (isOpen) {
+			openSet.add(this);
+			scheduleAlign();
+			return;
+		}
+		openSet.delete(this);
+		if (!openSet.size && alignFrame) {
+			cancelAnimationFrame(alignFrame);
+			alignFrame = 0;
+		}
+	}
+
+	/**
+	 * Choose the side with room and hand the menu the height it can actually
+	 * use. Called every frame while open because a floating trigger moves
+	 * between frames; a decision made once at open time goes stale immediately.
+	 */
+	alignMenu() {
+		const rect = this.trigger.getBoundingClientRect();
+		const below = window.innerHeight - rect.bottom - MENU_GAP;
+		const above = rect.top - MENU_GAP;
+		const wanted = this.listbox.scrollHeight + MENU_GAP;
+		const up = below < wanted && above > below;
+		const room = Math.max(MENU_MIN, up ? above : below);
+		this.listbox.classList.toggle("is-up", up);
+		this.listbox.style.setProperty("--menu-room", `${Math.round(room)}px`);
 	}
 
 	highlight(index) {

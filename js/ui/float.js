@@ -12,7 +12,8 @@
  */
 
 const SPEED = [55, 130]; // px per second, picked per element
-const WANDER = 0.9; // radians per second of heading drift
+const WANDER = 0.35; // radians per second of heading drift
+const SWERVE = 0.5; // chance per second of a hard, sudden turn
 const WOBBLE = 4; // degrees of tilt, so a row never sits level
 const MAX_FRAME = 50; // ms — a backgrounded tab must not teleport anything
 const EDGE = 14; // px kept off every edge, so the tilt never clips a row
@@ -20,16 +21,24 @@ const EDGE = 14; // px kept off every edge, so the tilt never clips a row
 const rand = (min, max) => min + Math.random() * (max - min);
 
 /**
- * Space kept below a row so an open listbox stays on screen. Vertical only: a
- * listbox is anchored to the trigger inside the row, so it is never wider than
- * the row it hangs from and needs no horizontal room. It is also capped by the
- * viewport, since a phone cannot spare a fixed 300px and would otherwise pin
- * every row to the top of the screen.
+ * The band a row is allowed to occupy, measured fresh each frame.
+ *
+ * The top is the lower edge of the sticky header rather than the viewport: the
+ * header paints above these rows, so a menu that drifts behind it disappears
+ * for no reason. The bottom is the viewport itself — an open listbox keeps
+ * itself on screen (ArchiveSelect flips it above its trigger when there is no
+ * room below), so a row near the floor is not a row you cannot read.
  */
-const menuRoom = () => Math.min(300, window.innerHeight * 0.4);
-
-const spanX = (w) => Math.max(0, window.innerWidth - w - EDGE * 2);
-const spanY = (h) => Math.max(0, window.innerHeight - h - menuRoom() - EDGE * 2);
+function bounds() {
+	const header = document.querySelector(".site-header");
+	const top = (header ? header.getBoundingClientRect().bottom : 0) + EDGE;
+	return {
+		top,
+		bottom: Math.max(top, window.innerHeight - EDGE),
+		left: EDGE,
+		right: Math.max(EDGE, window.innerWidth - EDGE),
+	};
+}
 
 export function createFloaters({ elements }) {
 	const list = () => (typeof elements === "function" ? elements() : elements);
@@ -38,7 +47,7 @@ export function createFloaters({ elements }) {
 	let frame = 0;
 	let last = 0;
 
-	function spawn(el) {
+	function spawn(el, box) {
 		// Measured here as well as each frame so the first placement is already
 		// on screen — a row that spawns half off the right edge and snaps back a
 		// frame later reads as a glitch.
@@ -48,8 +57,8 @@ export function createFloaters({ elements }) {
 			el,
 			w,
 			h,
-			x: rand(EDGE, EDGE + spanX(w)),
-			y: rand(EDGE, EDGE + spanY(h)),
+			x: rand(box.left, Math.max(box.left, box.right - w)),
+			y: rand(box.top, Math.max(box.top, box.bottom - h)),
 			heading: rand(0, Math.PI * 2),
 			speed: rand(SPEED[0], SPEED[1]),
 			drift: rand(-WANDER, WANDER),
@@ -58,32 +67,37 @@ export function createFloaters({ elements }) {
 	}
 
 	/**
-	 * A row holding an open listbox, or one already solved, sits still. Chasing
-	 * a cursor out of a list you are reading is difficulty with no point, and an
-	 * option list that slides sideways under a keyboard user is worse than
-	 * merely hard. Deliberately not "while focused": closing a menu returns
-	 * focus to its trigger, so a focus rule would leave every row you have ever
-	 * touched parked for the rest of the run.
+	 * A solved row parks itself. There is nothing left to catch there, and a row
+	 * you have already committed to should stop competing for the cursor. An
+	 * open listbox deliberately does *not* freeze anything: the whole point of
+	 * the mode is that the menu keeps moving while you aim, and the listbox
+	 * travels with its row and stays on screen.
 	 */
 	function held(body) {
-		return body.el.classList.contains("is-solved") || Boolean(body.el.querySelector('[aria-expanded="true"]'));
+		return body.el.classList.contains("is-solved");
 	}
 
-	function advance(body, dt, clock) {
+	function advance(body, dt, clock, box) {
 		if (held(body)) return;
 
+		// A gentle constant drift plus occasional hard swerves. Drift alone at any
+		// useful rate curves a row into an orbit it never leaves, so the menus
+		// would wander in one corner of the screen and read as stuck; straight
+		// runs interrupted by jinks are what actually carry a row across the whole
+		// band and bounce it off all four walls.
 		body.heading += body.drift * dt * rand(0.4, 1.6);
+		if (Math.random() < SWERVE * dt) body.heading += rand(-1.2, 1.2);
 		body.x += Math.cos(body.heading) * body.speed * dt;
 		body.y += Math.sin(body.heading) * body.speed * dt;
 
-		const maxX = EDGE + spanX(body.w);
-		const maxY = EDGE + spanY(body.h);
-		if (body.x <= EDGE || body.x >= maxX) {
-			body.x = Math.min(Math.max(body.x, EDGE), maxX);
+		const maxX = Math.max(box.left, box.right - body.w);
+		const maxY = Math.max(box.top, box.bottom - body.h);
+		if (body.x <= box.left || body.x >= maxX) {
+			body.x = Math.min(Math.max(body.x, box.left), maxX);
 			body.heading = Math.PI - body.heading;
 		}
-		if (body.y <= EDGE || body.y >= maxY) {
-			body.y = Math.min(Math.max(body.y, EDGE), maxY);
+		if (body.y <= box.top || body.y >= maxY) {
+			body.y = Math.min(Math.max(body.y, box.top), maxY);
 			body.heading = -body.heading;
 		}
 
@@ -95,27 +109,30 @@ export function createFloaters({ elements }) {
 	function tick(now) {
 		const dt = Math.min(now - last, MAX_FRAME) / 1000;
 		last = now;
-		// Sizes first, then motion: reading offsetWidth between two transform
-		// writes would force a layout for every element instead of once.
+		// Reads first, then motion: measuring between two transform writes would
+		// force a layout for every element instead of once for all of them.
+		const box = bounds();
 		bodies.forEach((body) => {
 			body.w = body.el.offsetWidth;
 			body.h = body.el.offsetHeight;
 		});
-		bodies.forEach((body) => advance(body, dt, now / 1000));
+		bodies.forEach((body) => advance(body, dt, now / 1000, box));
 		frame = requestAnimationFrame(tick);
 	}
 
 	function onResize() {
+		const box = bounds();
 		bodies.forEach((body) => {
-			body.x = Math.min(Math.max(body.x, EDGE), EDGE + spanX(body.offsetWidth));
-			body.y = Math.min(Math.max(body.y, EDGE), EDGE + spanY(body.offsetHeight));
+			body.x = Math.min(Math.max(body.x, box.left), Math.max(box.left, box.right - body.offsetWidth));
+			body.y = Math.min(Math.max(body.y, box.top), Math.max(box.top, box.bottom - body.offsetHeight));
 		});
 	}
 
 	function start() {
 		if (frame) return;
-		bodies = list().map(spawn);
-		bodies.forEach((body) => advance(body, 0, performance.now() / 1000));
+		const box = bounds();
+		bodies = list().map((el) => spawn(el, box));
+		bodies.forEach((body) => advance(body, 0, performance.now() / 1000, box));
 		window.addEventListener("resize", onResize);
 		last = performance.now();
 		frame = requestAnimationFrame(tick);
