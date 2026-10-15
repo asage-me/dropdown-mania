@@ -164,16 +164,26 @@
 	color: var(--text-faint);
 }
 
-/* Advanced mode: the menus drift. Motion is opt-in via the difficulty switch
-   and never applied under prefers-reduced-motion (handled in JS). */
-.path.is-moving .path__level {
-	animation: drift var(--drift-duration, 0.8s) ease-in-out infinite alternate;
-	will-change: transform;
+/* Advanced mode: the rows leave the page and float around the viewport.
+   js/ui/float.js writes the transform, so the row has to start at 0,0 and be
+   out of flow. Motion is opt-in via the difficulty switch and never applied
+   under prefers-reduced-motion (handled in JS). The board keeps a floor of
+   height because with every row fixed there is nothing left to hold it open. */
+.path.is-floating {
+	min-height: 60vh;
 }
 
-@keyframes drift {
-	from { transform: translate3d(0, 0, 0); }
-	to   { transform: translate3d(var(--drift-x, 12px), var(--drift-y, -8px), 0); }
+.path.is-floating .path__level {
+	position: fixed;
+	left: 0;
+	top: 0;
+	/* 72px of slack rather than 24: on a phone the row is nearly the width of
+	   the screen, and a row that wide has nowhere to float to. Giving up a
+	   little width is what buys the drift its horizontal range. */
+	width: min(560px, calc(100vw - 72px));
+	margin: 0;
+	z-index: 40; /* above the page, below the nav (100) and the overlays (300) */
+	will-change: transform;
 }
 
 .result {

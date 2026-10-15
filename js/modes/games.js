@@ -51,6 +51,11 @@ export default {
 				const node = root.querySelector(`[data-game="${other}"]`);
 				if (node) node.hidden = other !== gameId;
 			});
+			// A hidden game is still mounted, so anything animating would keep
+			// animating off-screen. Give it the chance to stop.
+			ORDER.forEach((other) => {
+				if (other !== gameId) instances.get(other)?.onHide?.();
+			});
 			setTabState(gameId);
 
 			if (!instances.has(gameId)) {

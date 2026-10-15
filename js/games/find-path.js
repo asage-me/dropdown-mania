@@ -7,11 +7,13 @@
  * brute-forced, and a wrong pick wiped the board with no record of what you had
  * already learned — so field notes now survive a reset.
  *
- * Advanced mode is the "dropdowns move while you click" idea from ideas.md.
+ * Advanced mode is the "dropdowns move while you click" idea from ideas.md:
+ * the rows leave the page entirely and drift around the viewport (js/ui/float.js).
  * It is disabled under prefers-reduced-motion rather than silently shown still.
  */
 
 import { enhanceSelects } from "../ui/select.js";
+import { createFloaters } from "../ui/float.js";
 import { loadMerged, save } from "../lib/store.js";
 
 const STORE_KEY = "find-path";
@@ -48,14 +50,6 @@ const LEVELS = [
 	},
 ];
 
-/* Advanced-mode drift. Each level gets a slightly longer cycle so the five
- * menus never pulse in lockstep. DRIFT_SPEED divides them all — it is a speed
- * multiplier, so 5 means "five times faster than the 3.2s reference" and the
- * whole game is retuned in one place instead of five. */
-const DRIFT_BASE = 3.2;
-const DRIFT_STEP = 0.7;
-const DRIFT_SPEED = 5;
-
 const state = {
 	mode: "standard",
 	solved: [],
@@ -88,6 +82,8 @@ export default {
 		const timers = [];
 		let ticker = 0;
 		let selects = [];
+		// A getter, not a snapshot: buildBoard() replaces every row on rebuild.
+		const floaters = createFloaters({ elements: () => selects.map(({ step }) => step) });
 
 		/* ---------- build ---------- */
 
@@ -164,7 +160,7 @@ export default {
 			selects.forEach(({ select, step }, index) => {
 				select.value = "";
 				select.dispatchEvent(new Event("change", { bubbles: true }));
-				step.classList.remove("is-solved", "is-open-drift");
+				step.classList.remove("is-solved");
 				step.hidden = index > 0;
 				const verdict = step.querySelector("[data-verdict]");
 				verdict.textContent = "";
@@ -253,16 +249,12 @@ export default {
 				button.setAttribute("aria-pressed", String(on));
 			});
 			const moving = mode === "advanced" && !reduceMotion;
-			board.classList.toggle("is-moving", moving);
-			selects.forEach(({ step }, index) => {
-				const cycle = (DRIFT_BASE + index * DRIFT_STEP) / DRIFT_SPEED;
-				step.style.setProperty("--drift-duration", `${cycle.toFixed(2)}s`);
-				step.style.setProperty("--drift-x", `${(index % 2 === 0 ? 1 : -1) * (10 + index * 4)}px`);
-				step.style.setProperty("--drift-y", `${(index % 3 === 0 ? -1 : 1) * (6 + index * 3)}px`);
-			});
+			board.classList.toggle("is-floating", moving);
+			if (moving) floaters.start();
+			else floaters.stop();
 			paintBest();
 			status.textContent = moving
-				? "Advanced: the menus drift. Same rules, steadier hands."
+				? "Advanced: the menus have left the page. Catch one."
 				: (mode === "advanced"
 					? "Advanced requested, but your system asks for reduced motion — the menus will stay still."
 					: "Standard: the menus hold still.");
@@ -309,6 +301,7 @@ export default {
 		return {
 			unmount() {
 				stopClock();
+				floaters.stop();
 				timers.forEach(window.clearTimeout);
 				root.querySelectorAll("[data-fp-mode]").forEach((button) => {
 					button.removeEventListener("click", onModeClick);
@@ -318,6 +311,13 @@ export default {
 				paintBest();
 				attemptsEl.textContent = String(state.attempts);
 				clockEl.textContent = formatTime(state.elapsed);
+				// Switching games only hides this section, so the loop was
+				// stopped with the rows measured at zero. Start again from a
+				// fresh spread rather than resuming from a stale corner.
+				if (state.mode === "advanced" && !reduceMotion) floaters.start();
+			},
+			onHide() {
+				floaters.stop();
 			},
 		};
 	},
