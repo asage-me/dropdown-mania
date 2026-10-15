@@ -42,9 +42,13 @@ export function getCatalogue() {
 			return index;
 		})
 		.catch((error) => {
+			// A failure must not be cached. `index` is truthy-checked above and
+			// `pending` is returned verbatim, so caching an empty index would
+			// serve "0 entries" and an empty palette for the rest of the visit
+			// and never retry. Drop pending so the next caller tries again.
 			console.error("Catalogue index unavailable:", error);
-			index = [];
-			return index;
+			pending = null;
+			return [];
 		});
 
 	return pending;
