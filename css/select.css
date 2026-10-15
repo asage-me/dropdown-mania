@@ -193,13 +193,25 @@
 .pick__trigger {
 	justify-content: space-between;
 	gap: 16px;
-	min-width: min(320px, 100%);
+	/* A percentage floor cannot work here: the .pick wrapper is
+	   shrink-to-fit, so 100% is indefinite and the floor collapsed to zero —
+	   the trigger then sized itself to its own text and changed width on every
+	   selection ("No tags selected" 166px, "1 selected" 125px). A definite
+	   width keeps the control still while its value changes. */
+	width: min(320px, calc(100vw - 96px));
 	padding: 13px 16px;
 	font-family: var(--font-body);
 	font-size: 1rem;
 }
 
-.pick__value { flex: 1; }
+/* Long values ellipsize rather than growing the trigger or pushing the caret. */
+.pick__value {
+	flex: 1;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 
 .pick__caret { width: 8px; height: 8px; }
 
@@ -264,9 +276,17 @@
 	top: calc(100% + 6px);
 	left: 0;
 	display: grid;
-	grid-template-columns: repeat(3, minmax(140px, 1fr));
+	/* Tracks shrink to 0 so a long label wraps instead of pushing the last
+	   column past the panel border. */
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 26px;
-	width: max(420px, 100%);
+	/* A fixed 420px could not hold 3 x 140px columns + 2 x 26px gaps + 48px
+	   padding, so "Records" hung 104px outside the box. Sizing the width from
+	   the columns keeps the two in agreement however many links are added;
+	   the floor keeps it reading as a mega menu rather than a tooltip. */
+	width: max-content;
+	min-width: min(420px, calc(100vw - 32px));
+	max-width: calc(100vw - 32px);
 	padding: 22px 24px;
 	background: var(--panel-raised);
 	border: 1px solid var(--border-strong);
@@ -299,7 +319,11 @@
 		left: 12px;
 		right: 12px;
 		bottom: 12px;
+		/* left/right pin the sheet, so the desktop width rules must not
+		   survive here — a 420px floor would overflow a 390px phone. */
 		width: auto;
+		min-width: 0;
+		max-width: none;
 		max-height: 65vh;
 		overflow-y: auto;
 		grid-template-columns: 1fr;
