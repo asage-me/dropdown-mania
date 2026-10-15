@@ -7,51 +7,30 @@
  * brute-forced, and a wrong pick wiped the board with no record of what you had
  * already learned — so field notes now survive a reset.
  *
+ * The questions themselves live in path-sets.js: fifty themed sets of five
+ * levels. The picker above the board offers the three ways in — a set dealt at
+ * random, the journey through all fifty in order, or any one set by name — and
+ * the count in the statline is the only progression the game needs.
+ *
  * Advanced mode is the "dropdowns move while you click" idea from ideas.md:
  * the rows leave the page entirely and drift around the viewport (js/ui/float.js).
  * It is disabled under prefers-reduced-motion rather than silently shown still.
  */
 
-import { enhanceSelects } from "../ui/select.js";
+import { destroySelectsIn, enhanceSelects, refreshSelect, syncSelect } from "../ui/select.js";
 import { createFloaters } from "../ui/float.js";
 import { loadMerged, save } from "../lib/store.js";
+import {
+	JOURNEY_PICK, PATH_SETS, PATH_THEMES, RANDOM_PICK, SET_COUNT, getSet, randomSetId,
+} from "./path-sets.js";
 
 const STORE_KEY = "find-path";
-const LEVELS = [
-	{
-		prompt: "Which of these is not a shade of blue?",
-		options: ["Cobalt", "Cerulean", "Ochre", "Indigo"],
-		correct: "Ochre",
-		rule: "Ochre is an earth yellow; the other three are blues.",
-	},
-	{
-		prompt: "Which number does not belong?",
-		options: ["16", "25", "32", "49"],
-		correct: "32",
-		rule: "16, 25 and 49 are perfect squares. 32 is a power of two.",
-	},
-	{
-		prompt: "Which tag has never existed in HTML?",
-		options: ["select", "menu", "dropdown", "datalist"],
-		correct: "dropdown",
-		rule: "<select>, <menu> and <datalist> are real elements. <dropdown> is a rumour.",
-	},
-	{
-		prompt: "Which of these is not a data structure?",
-		options: ["Stack", "Queue", "Carousel", "Heap"],
-		correct: "Carousel",
-		rule: "A carousel is a UI component. The rest are structures you would implement.",
-	},
-	{
-		prompt: "Which prefix does this archive stamp on its exhibits?",
-		options: ["DD", "AX", "MR", "TX"],
-		correct: "DD",
-		rule: "Dropdown Archive → DD. You have been reading them all along.",
-	},
-];
 
 const state = {
 	mode: "standard",
+	setPick: RANDOM_PICK,
+	setId: PATH_SETS[0].id,
+	levels: PATH_SETS[0].levels,
 	solved: [],
 	attempts: 0,
 	hintsLeft: 2,
@@ -60,7 +39,39 @@ const state = {
 	won: false,
 };
 
-let record = loadMerged(STORE_KEY, { standard: null, advanced: null });
+// journey is how far through the ordered shelf the player has got, and
+// completed is every set ever cleared, however it was reached. Both merge over
+// an older save, so neither needs a version bump — and bumping one would wipe
+// everybody's best times.
+let record = loadMerged(STORE_KEY, { standard: null, advanced: null, journey: 0, completed: [] });
+
+/**
+ * Fill the picker: two ways of letting the archive choose, then every set under
+ * its theme. Options are built as nodes rather than markup so a name carrying
+ * an ampersand survives the trip into a native select.
+ */
+function fillSetPicker(select) {
+	select.innerHTML = "";
+	select.append(
+		new Option("Random — a fresh set every run", RANDOM_PICK),
+		new Option(`Journey — all ${SET_COUNT} sets, in order`, JOURNEY_PICK),
+		...PATH_THEMES.map((theme) => {
+			const group = document.createElement("optgroup");
+			group.label = theme;
+			group.append(...PATH_SETS
+				.filter((set) => set.theme === theme)
+				.map((set) => new Option(set.name, set.id)));
+			return group;
+		}),
+	);
+}
+
+/** Turn a picker value into the set to play right now. */
+function resolveSetId(pick) {
+	if (pick === RANDOM_PICK) return randomSetId(state.setId);
+	if (pick === JOURNEY_PICK) return PATH_SETS[Math.min(record.journey, SET_COUNT - 1)].id;
+	return pick;
+}
 
 export default {
 	id: "find-path",
@@ -72,6 +83,9 @@ export default {
 		const attemptsEl = root.querySelector("[data-fp-attempts]");
 		const clockEl = root.querySelector("[data-fp-clock]");
 		const bestEl = root.querySelector("[data-fp-best]");
+		const setsEl = root.querySelector("[data-fp-sets]");
+		const setSelect = root.querySelector("[data-fp-set]");
+		const blurbEl = root.querySelector("[data-fp-set-blurb]");
 		const hintBtn = root.querySelector("[data-fp-hint]");
 		const hintCount = root.querySelector("[data-fp-hint-count]");
 		const notes = document.createElement("p");
@@ -79,19 +93,21 @@ export default {
 		notes.dataset.fpNotes = "";
 
 		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-		const timers = [];
 		let ticker = 0;
 		let selects = [];
 		// A getter, not a snapshot: buildBoard() replaces every row on rebuild.
 		const floaters = createFloaters({ elements: () => selects.map(({ step }) => step) });
 
+		const current = () => getSet(state.setId);
+
 		/* ---------- build ---------- */
 
 		function buildBoard() {
+			destroySelectsIn(board);
 			board.innerHTML = "";
 			selects = [];
 
-			LEVELS.forEach((level, index) => {
+			state.levels.forEach((level, index) => {
 				const step = document.createElement("div");
 				step.className = "path__level";
 				step.dataset.level = String(index);
@@ -104,13 +120,16 @@ export default {
 					<p class="path__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</p>
 					<label class="path__prompt" for="${id}"></label>
 					<div class="path__control">
-						<select id="${id}">
-							<option value="">Choose…</option>
-							${shuffled.map((option) => `<option value="${option}">${option}</option>`).join("")}
-						</select>
+						<select id="${id}"></select>
 					</div>
 					<p class="path__verdict" data-verdict role="status" aria-live="polite"></p>`;
 				step.querySelector(".path__prompt").textContent = level.prompt;
+				// Built as nodes, not interpolated into markup: an answer such as
+				// "<=>" would otherwise be parsed as a tag and arrive mangled.
+				step.querySelector("select").append(
+					new Option("Choose…", ""),
+					...shuffled.map((option) => new Option(option, option)),
+				);
 				board.appendChild(step);
 
 				const select = step.querySelector("select");
@@ -125,7 +144,7 @@ export default {
 
 		function onPick(index, select) {
 			if (!select.value || state.won) return;
-			const level = LEVELS[index];
+			const level = state.levels[index];
 			const verdict = selects[index].step.querySelector("[data-verdict]");
 			state.attempts += 1;
 			attemptsEl.textContent = String(state.attempts);
@@ -138,11 +157,11 @@ export default {
 				selects[index].step.classList.add("is-solved");
 				paintNotes();
 
-				if (index === LEVELS.length - 1) {
+				if (index === state.levels.length - 1) {
 					win();
 				} else {
 					selects[index + 1].step.hidden = false;
-					status.textContent = `Level ${index + 2} of ${LEVELS.length}. ${LEVELS[index + 1].prompt}`;
+					status.textContent = levelLine(index + 1);
 					selects[index + 1].select.focus();
 				}
 			} else {
@@ -173,8 +192,12 @@ export default {
 				verdict.className = "path__verdict";
 			});
 			paintNotes();
-			status.textContent = `Level 1 of ${LEVELS.length}. ${LEVELS[0].prompt}`;
+			status.textContent = levelLine(0);
 			clockEl.textContent = "0:00";
+		}
+
+		function levelLine(index) {
+			return `${current().name} — level ${index + 1} of ${state.levels.length}. ${state.levels[index].prompt}`;
 		}
 
 		function paintNotes() {
@@ -185,7 +208,7 @@ export default {
 			const solvedList = state.solved
 				.slice()
 				.sort((a, b) => a - b)
-				.map((i) => `${i + 1}. ${LEVELS[i].correct}`)
+				.map((i) => `${i + 1}. ${state.levels[i].correct}`)
 				.join("   ");
 			notes.textContent = `Field notes — already proven: ${solvedList}`;
 		}
@@ -212,12 +235,18 @@ export default {
 			state.won = true;
 			stopClock();
 			const previous = record[state.mode];
-			const isBest = previous === null || state.elapsed < previous;
-			if (isBest) {
-				record[state.mode] = state.elapsed;
-				save(STORE_KEY, record);
+			const isBest = typeof previous !== "number" || state.elapsed < previous;
+			if (isBest) record[state.mode] = state.elapsed;
+			if (!record.completed.includes(state.setId)) {
+				record.completed = [...record.completed, state.setId];
 			}
+			if (state.setPick === JOURNEY_PICK) {
+				record.journey = Math.min(record.journey + 1, SET_COUNT);
+			}
+			save(STORE_KEY, record);
 			paintBest();
+			paintProgress();
+
 			result.hidden = false;
 			result.className = "result is-win";
 			result.innerHTML = `
@@ -229,20 +258,83 @@ export default {
 				`${formatTime(state.elapsed)} in ${state.attempts} ${state.attempts === 1 ? "attempt" : "attempts"}` +
 				(isBest ? " — a new best." : ` — best remains ${formatTime(previous)}.`);
 			result.querySelector(".result__meta").textContent =
-				state.mode === "advanced" ? "Advanced: menus were moving." : "Standard difficulty.";
+				`${current().name}. ${state.mode === "advanced" ? "Advanced: menus were moving." : "Standard difficulty."} ` +
+				`${record.completed.length} of ${SET_COUNT} sets cleared.`;
 			const rules = result.querySelector(".result__rules");
-			LEVELS.forEach((level) => {
+			state.levels.forEach((level) => {
 				const item = document.createElement("li");
 				item.textContent = level.rule;
 				rules.appendChild(item);
 			});
+			const next = nextButton();
+			if (next) result.appendChild(next);
 			status.textContent = "Solved. Every rule above was in the labels the whole time.";
 			api.unlock(state.mode === "advanced" ? "path-advanced" : "path-first");
+			if (record.completed.length === SET_COUNT) api.unlock("path-catalogue");
+		}
+
+		/** The follow-up button, or null when there is nothing queued to play. */
+		function nextButton() {
+			if (state.setPick === RANDOM_PICK) return nextAction("Deal another set");
+			if (state.setPick === JOURNEY_PICK && record.journey < SET_COUNT) {
+				return nextAction(`On to set ${record.journey + 1} of ${SET_COUNT}`);
+			}
+			return null;
+		}
+
+		function nextAction(label) {
+			const button = document.createElement("button");
+			button.type = "button";
+			button.className = "btn btn--sm result__next";
+			button.dataset.fpNext = "";
+			button.textContent = label;
+			return button;
 		}
 
 		function paintBest() {
 			const value = record[state.mode];
-			bestEl.textContent = value === null || value === undefined ? "—" : formatTime(value);
+			bestEl.textContent = typeof value === "number" ? formatTime(value) : "—";
+		}
+
+		function paintProgress() {
+			setsEl.textContent = `${record.completed.length} of ${SET_COUNT}`;
+		}
+
+		/* ---------- sets ---------- */
+
+		/**
+		 * Load whichever set the picker value points at and clear the run around
+		 * it. Random resolves to a new set every time, so "Restart run" deals a
+		 * fresh one while a named set replays itself.
+		 */
+		function loadSet(pick) {
+			state.setPick = pick;
+			state.setId = resolveSetId(pick);
+			state.levels = current().levels;
+			setSelect.value = pick;
+			syncSelect(setSelect);
+			blurbEl.textContent = current().blurb;
+			buildBoard();
+			resetBoard();
+			restartFloaters();
+		}
+
+		function restartFloaters() {
+			if (!board.classList.contains("is-floating")) return;
+			// The loop holds the rows it measured when it started, so a rebuilt
+			// board has to be handed over rather than left driving dead nodes.
+			floaters.stop();
+			floaters.start();
+		}
+
+		function newRun(pick = state.setPick) {
+			state.won = false;
+			state.attempts = 0;
+			attemptsEl.textContent = "0";
+			state.hintsLeft = 2;
+			hintCount.textContent = `(${state.hintsLeft})`;
+			result.hidden = true;
+			loadSet(pick);
 		}
 
 		/* ---------- difficulty ---------- */
@@ -273,10 +365,10 @@ export default {
 				status.textContent = "No hints left this visit. The rules are in the labels.";
 				return;
 			}
-			const index = Math.min(state.solved.length, LEVELS.length - 1);
+			const index = Math.min(state.solved.length, state.levels.length - 1);
 			state.hintsLeft -= 1;
 			hintCount.textContent = `(${state.hintsLeft})`;
-			status.textContent = `Hint — level ${index + 1}: ${LEVELS[index].rule}`;
+			status.textContent = `Hint — level ${index + 1}: ${state.levels[index].rule}`;
 		}
 
 		/* ---------- wiring ---------- */
@@ -286,20 +378,32 @@ export default {
 			button.addEventListener("click", onModeClick);
 		});
 
-		const onReset = () => {
-			state.attempts = 0;
-			state.won = false;
-			state.hintsLeft = 2;
-			hintCount.textContent = `(${state.hintsLeft})`;
-			result.hidden = true;
-			resetBoard();
+		const onSetChange = () => newRun(setSelect.value);
+		setSelect.addEventListener("change", onSetChange);
+
+		// The result panel is rewritten on every win, so its button is caught by
+		// delegation rather than bound each time it appears.
+		const onNext = (event) => {
+			if (event.target instanceof HTMLElement && event.target.dataset.fpNext !== undefined) {
+				newRun(state.setPick);
+			}
 		};
+		result.addEventListener("click", onNext);
+
+		const onReset = () => newRun(state.setPick);
 		root.querySelector("[data-fp-reset]").addEventListener("click", onReset);
 		hintBtn.addEventListener("click", takeHint);
 
-		buildBoard();
+		fillSetPicker(setSelect);
+		// The router upgrades every select in the outlet before a game mounts, so
+		// this one was already upgraded while it was still empty. Filling the
+		// native element is not enough on its own: the widget has to be told to
+		// read it again.
+		refreshSelect(setSelect);
+		loadSet(state.setPick);
 		setMode(state.mode);
 		paintBest();
+		paintProgress();
 		attemptsEl.textContent = String(state.attempts);
 		clockEl.textContent = formatTime(state.elapsed);
 		if (state.won) result.hidden = false;
@@ -308,13 +412,15 @@ export default {
 			unmount() {
 				stopClock();
 				floaters.stop();
-				timers.forEach(window.clearTimeout);
 				root.querySelectorAll("[data-fp-mode]").forEach((button) => {
 					button.removeEventListener("click", onModeClick);
 				});
+				setSelect.removeEventListener("change", onSetChange);
+				result.removeEventListener("click", onNext);
 			},
 			onShow() {
 				paintBest();
+				paintProgress();
 				attemptsEl.textContent = String(state.attempts);
 				clockEl.textContent = formatTime(state.elapsed);
 				// Switching games only hides this section, so the loop was

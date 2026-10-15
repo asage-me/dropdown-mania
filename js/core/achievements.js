@@ -18,6 +18,7 @@ const ACHIEVEMENTS = {
 	"edu-complete": { accession: "AC-08", title: "Catalogue Read", note: "Opened every exhibit in Education." },
 	"wing-visitor": { accession: "AC-09", title: "Full Tour", note: "Visited all three wings in one sitting." },
 	"lazy-jackpot": { accession: "AC-10", title: "Lightning Drop", note: "Picked the one prize row out of the Long Menu's 500." },
+	"path-catalogue": { accession: "AC-11", title: "The Whole Shelf", note: "Cleared all fifty question sets in Find the Path." },
 };
 
 // No reset(): the record book is append-only, and nothing in the UI clears it.

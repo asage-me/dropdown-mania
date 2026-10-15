@@ -93,6 +93,39 @@
 	color: var(--accent-ink);
 }
 
+/* Find the Path's set picker sits above the difficulty switch and is a real
+   dropdown, because fifty named sets are a menu rather than fifty buttons. Its
+   label is the accessible name ArchiveSelect reads for the widget. */
+.fp-sets {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 12px;
+	margin: 22px 0 0;
+}
+
+.fp-sets__label {
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.fp-sets .sel {
+	flex: 0 1 340px;
+	min-width: 220px;
+}
+
+.fp-sets__blurb {
+	flex: 1 1 200px;
+	font-size: 0.8rem;
+	font-style: italic;
+	color: var(--text-muted);
+}
+
+.result__next { margin-top: 16px; }
+
 .game__note {
 	font-family: var(--font-mono);
 	font-size: 0.76rem;

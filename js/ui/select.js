@@ -151,7 +151,20 @@ class ArchiveSelect {
 		}));
 
 		this.listbox.innerHTML = "";
+		let lastGroup = null;
 		this.items = this.options.map((opt) => {
+			// A group header is decoration between the options. It never joins
+			// this.items, so the arrow keys still step option to option and the
+			// highlight logic never has to know that groups exist.
+			if (opt.group && opt.group !== lastGroup) {
+				const header = document.createElement("div");
+				header.className = "sel__group";
+				header.setAttribute("aria-hidden", "true");
+				header.textContent = opt.group;
+				this.listbox.appendChild(header);
+			}
+			lastGroup = opt.group;
+
 			const item = document.createElement("div");
 			item.className = "sel__option";
 			item.setAttribute("role", "option");

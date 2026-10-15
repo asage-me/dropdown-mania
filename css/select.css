@@ -142,6 +142,29 @@
 	text-decoration: line-through;
 }
 
+/* Group headers come from <optgroup label="…">, so a long list can be scanned
+   in the custom widget exactly as it would be in the native one. They are
+   aria-hidden: the option's own accessible name already carries the group
+   through the native select, and a widget that announced every heading would
+   read like a table of contents on the way to the one line you wanted. */
+.sel__group {
+	padding: 10px 11px 4px;
+	font-family: var(--font-mono);
+	font-size: 0.6rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+	border-top: 1px solid var(--border);
+	margin-top: 5px;
+	white-space: nowrap;
+}
+
+.sel__group:first-child {
+	border-top: 0;
+	margin-top: 0;
+	padding-top: 2px;
+}
+
 /* ---------- The unfold ---------- */
 @keyframes unfold {
 	from { opacity: 0; transform: perspective(700px) rotateX(-28deg) translateY(-6px); }

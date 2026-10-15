@@ -31,13 +31,21 @@
         <div>
             <h3 id="find-path-h">Find the Path</h3>
             <p>Five dropdowns, one correct sequence, no feedback beyond yes and no. A wrong
-                answer sends you back to level one, so read the labels.</p>
+                answer sends you back to level one, so read the labels. Fifty sets sit on the
+                shelf: let the archive deal one, walk them all in order, or choose by theme.</p>
         </div>
         <dl class="statline">
             <div><dt>Attempts</dt><dd data-fp-attempts>0</dd></div>
             <div><dt>Elapsed</dt><dd data-fp-clock>0:00</dd></div>
             <div><dt>Best</dt><dd data-fp-best>—</dd></div>
+            <div><dt>Sets cleared</dt><dd data-fp-sets>—</dd></div>
         </dl>
+    </div>
+
+    <div class="fp-sets">
+        <label class="fp-sets__label" for="fp-set">Question set</label>
+        <select id="fp-set" data-fp-set></select>
+        <p class="fp-sets__blurb" data-fp-set-blurb></p>
     </div>
 
     <div class="game__toolbar">
