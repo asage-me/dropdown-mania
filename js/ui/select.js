@@ -364,6 +364,19 @@ export function syncSelect(select) {
 	ArchiveSelect.of(select)?.paint();
 }
 
+/**
+ * The widget's trigger button for an upgraded select, or null.
+ *
+ * The trigger - not the hidden native element - is what the visitor tabs to
+ * and types into, so demo code that watches keys has to listen there. Ask the
+ * widget instead of walking the DOM: the root is a sibling of the native
+ * select, which makes previousElementSibling the only link and a silent
+ * no-op the moment the markup is reordered.
+ */
+export function selectTrigger(select) {
+	return ArchiveSelect.of(select)?.trigger ?? null;
+}
+
 /** Drop widgets whose DOM is about to be thrown away. */
 export function destroySelectsIn(scope) {
 	scope.querySelectorAll("select[data-archive-select]").forEach((select) => {

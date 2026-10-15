@@ -9,6 +9,7 @@
  */
 
 import { createMenu, Menu } from "../ui/menu.js";
+import { selectTrigger } from "../ui/select.js";
 
 export default {
 	id: "education",
@@ -297,7 +298,7 @@ export default {
 			};
 			on(root.querySelector("#dd008-select"), "keydown", onKey, true);
 			// The widget's trigger, not the hidden native element, receives keys.
-			const trigger = root.querySelector("#dd008-select")?.previousElementSibling?.querySelector(".sel__trigger");
+				const trigger = selectTrigger(root.querySelector("#dd008-select"));
 			on(trigger, "keydown", onKey, true);
 		}
 
