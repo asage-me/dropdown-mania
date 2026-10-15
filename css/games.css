@@ -348,11 +348,29 @@
 	border: 1px solid var(--border);
 }
 
+/* "Smaller" has to survive two things that used to cancel it out: a fixed
+   min-width floor here, and the 260px floor the game variant puts on every
+   trigger. Both scale with the tier now, so tier 6 really is half of tier 1.
+   Type only shrinks a fifth as fast as width — 0.5 scale must still be a
+   readable 13px, not the 8px a proportional font would give. */
 .tier {
+	--tier-trigger-w: calc(var(--tier-scale, 1) * 240px);
+	--tier-font: calc((0.8 + 0.2 * var(--tier-scale, 1)) * 1rem);
 	display: grid;
+	/* The column is the menu's width, so the label and hint wrap to it rather
+	   than holding the block at the hint's own min-content width — otherwise
+	   tier 6's 120px menu sits inside a 181px box and looks no smaller. */
+	grid-template-columns: minmax(0, var(--tier-trigger-w, 240px));
 	gap: 6px;
-	width: calc(var(--tier-scale, 1) * 240px);
-	min-width: 150px;
+	/* --t-med already carries a timing function, so naming a second one here
+	   makes the whole animation declaration invalid. */
+	animation: tier-arrive var(--t-med) both;
+	animation-delay: calc(var(--tier-index, 1) * 70ms);
+}
+
+@keyframes tier-arrive {
+	from { opacity: 0; transform: translateY(10px) scale(0.94); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .tier__label {
@@ -363,9 +381,19 @@
 	color: var(--text-faint);
 }
 
+/* .sel--game .sel__trigger is an equal-specificity rule loaded earlier in the
+   cascade, so the tier has to out-specify it, not merely follow it. */
 .tier .sel__trigger,
-.tier .sel__option {
-	font-size: clamp(0.78rem, calc(0.7rem + var(--tier-scale, 1) * 0.2rem), 0.95rem);
+.tier .sel--game .sel__trigger {
+	min-width: var(--tier-trigger-w, 240px);
+	max-width: 100%;
+	font-size: var(--tier-font, 1rem);
+}
+
+.tier .sel__option,
+.tier .sel--game .sel__option {
+	font-size: var(--tier-font, 1rem);
+	white-space: normal;
 }
 
 .tier__hint {
