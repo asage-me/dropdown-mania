@@ -8,7 +8,7 @@
  * a legible scale, and every colour comes from the token system.
  */
 
-import { enhanceSelects } from "../ui/select.js";
+import { destroySelectsIn, enhanceSelects } from "../ui/select.js";
 import { load, save } from "../lib/store.js";
 
 const STORE_KEY = "lazy-drop";
@@ -138,6 +138,9 @@ export default {
 		/* ---------- tiers ---------- */
 
 		function buildTiers() {
+			// Rebuilding throws away the upgraded selects, so tear their widgets
+			// down first — otherwise each "New tier" purchase leaks a listener.
+			destroySelectsIn(tiersEl);
 			tiersEl.innerHTML = "";
 			for (let tier = 1; tier <= state.tiers; tier += 1) {
 				const scale = TIER_SCALE[tier - 1] ?? 0.5;
@@ -145,6 +148,7 @@ export default {
 				const wrapper = document.createElement("div");
 				wrapper.className = "tier";
 				wrapper.style.setProperty("--tier-scale", String(scale));
+				wrapper.style.setProperty("--tier-index", String(tier));
 
 				const rareIndex = 1 + Math.floor(Math.random() * 3);
 				const choices = [1, 2, 3].map((n) => ({

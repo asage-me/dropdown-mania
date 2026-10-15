@@ -14,7 +14,7 @@
  * bugs the original had (init() ran on every tab click and re-bound handlers).
  */
 
-import { enhanceSelects } from "../ui/select.js";
+import { destroySelectsIn, enhanceSelects } from "../ui/select.js";
 import { loadTemplate } from "./templates.js";
 
 export function createRouter({ outlet, modes, onRendered, api }) {
@@ -68,6 +68,11 @@ export function createRouter({ outlet, modes, onRendered, api }) {
 		}
 		if (token !== generation) return; // a newer navigation won
 
+		// The outgoing widgets live inside the outlet, which is about to be
+		// overwritten. Each one holds a document-level focusout listener, so
+		// replacing the DOM without destroying them leaves every listener — and
+		// the detached subtree it closes over — reachable forever.
+		destroySelectsIn(outlet);
 		outlet.innerHTML = html;
 		enhanceSelects(outlet);
 
