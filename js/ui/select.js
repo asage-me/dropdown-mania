@@ -364,15 +364,9 @@ export function syncSelect(select) {
 	ArchiveSelect.of(select)?.paint();
 }
 
-export function closeAllSelects() {
-	ArchiveSelect.closeAll();
-}
-
 /** Drop widgets whose DOM is about to be thrown away. */
 export function destroySelectsIn(scope) {
 	scope.querySelectorAll("select[data-archive-select]").forEach((select) => {
 		ArchiveSelect.of(select)?.destroy();
 	});
 }
-
-export { ArchiveSelect };

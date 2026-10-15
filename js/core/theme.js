@@ -27,11 +27,7 @@ function syncButton() {
 	if (label) label.textContent = isDark ? "Vault" : "Daylight";
 }
 
-export function getTheme() {
-	return current;
-}
-
-export function setTheme(theme, { persist = true } = {}) {
+function setTheme(theme, { persist = true } = {}) {
 	apply(theme);
 	if (persist) save(KEY, theme);
 }

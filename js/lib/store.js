@@ -28,14 +28,6 @@ export function save(name, value) {
 	}
 }
 
-export function remove(name) {
-	try {
-		localStorage.removeItem(key(name));
-	} catch {
-		/* ignore */
-	}
-}
-
 /** Merge a partial object over stored defaults for one key. */
 export function loadMerged(name, defaults) {
 	return { ...defaults, ...(load(name, {}) || {}) };

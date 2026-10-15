@@ -7,7 +7,7 @@ import { loadMerged, save } from "../lib/store.js";
 
 const KEY = "achievements";
 
-export const ACHIEVEMENTS = {
+const ACHIEVEMENTS = {
 	"path-first": { accession: "AC-01", title: "Path Found", note: "Cleared Find the Path on standard." },
 	"path-advanced": { accession: "AC-02", title: "Steady Hand", note: "Cleared Find the Path while the menus moved." },
 	"hacker-granted": { accession: "AC-03", title: "Root Access", note: "Recovered the hidden password." },
@@ -19,7 +19,8 @@ export const ACHIEVEMENTS = {
 	"wing-visitor": { accession: "AC-09", title: "Full Tour", note: "Visited all three wings in one sitting." },
 };
 
-let state = loadMerged(KEY, {});
+// No reset(): the record book is append-only, and nothing in the UI clears it.
+const state = loadMerged(KEY, {});
 let host = null;
 let queue = [];
 let showing = false;
@@ -77,19 +78,10 @@ export function unlock(id) {
 	return true;
 }
 
-export function has(id) {
-	return Boolean(state[id]);
-}
-
 export function list() {
 	return Object.entries(ACHIEVEMENTS).map(([id, def]) => ({ id, ...def, unlocked: Boolean(state[id]) }));
 }
 
 export function unlockedCount() {
 	return Object.keys(state).filter((id) => state[id]).length;
-}
-
-export function reset() {
-	state = {};
-	save(KEY, state);
 }
