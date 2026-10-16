@@ -149,7 +149,12 @@ export default {
 			const flag = getFlag(state.target);
 			const done = cleared().has(flag.id);
 			briefEl.textContent = flag.brief;
-			payloadEl.textContent = flag.payload ? `${flag.cipher}: ${flag.payload}` : flag.key;
+			// The payload line is terminal output, so it stays in character for the
+			// one flag with nothing to print: FLAG-01 names its cipher rather than
+			// giving the player browser instructions. The brief below already says
+			// which four surfaces to search, and the hint ladder is where a
+			// "right-click → View source" instruction belongs.
+			payloadEl.textContent = flag.payload ? `${flag.cipher}: ${flag.payload}` : flag.cipher;
 			payloadEl.hidden = false;
 			clueList.hidden = flag.id !== "credential";
 			input.placeholder = flag.id === "credential" ? "0P3N-…-51GN" : "flag{…}";
