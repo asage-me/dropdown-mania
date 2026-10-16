@@ -55,6 +55,47 @@
 	font-weight: 800;
 	font-stretch: 112%;
 	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+	color: var(--accent);
+}
+
+/* The bank is the one number on the site with no ceiling, and while it sat in
+   the statline it sized the head's auto column: every banked million walked the
+   other readouts — and the board underneath — sideways. It gets a band of its
+   own across the page, so there is nothing on its row to push. Tabular figures
+   keep the digits from shuffling as they tick, and the clamp lets it scale down
+   rather than overflow a phone. */
+.bank {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px 14px;
+	margin: 20px 0 0;
+	padding: 12px 16px;
+	border: 1px solid var(--border);
+	background: var(--panel);
+}
+
+.bank__label {
+	font-family: var(--font-mono);
+	font-size: 0.58rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.bank__value {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-family: var(--font-display);
+	font-size: clamp(1.9rem, 7vw, 3.2rem);
+	font-weight: 800;
+	font-stretch: 112%;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.06;
+	white-space: nowrap;
+	text-align: right;
 	color: var(--accent);
 }
 
