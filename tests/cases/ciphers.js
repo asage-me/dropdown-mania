@@ -8,14 +8,16 @@
  * answer key it is testing against.
  */
 
-import { assert, fetchText, freshModule, suite, test } from "../harness.js";
+import * as mod from "../../js/games/hacker-flags.js";
+import { assert, fetchText, suite, test } from "../harness.js";
 
 /** A decoded flag is used inside a RegExp, and a flag is full of regex syntax. */
 function escapeRegExp(text) {
 	return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** How to undo each flag, given only the exported ciphers. */function decoderFor({
+/** How to undo each flag, given only the exported ciphers. */
+function decoderFor({
 	SHIFT, CREDENTIAL, rot13, caesar, toHex, fromHex, toB64, fromB64, reverse,
 }) {
 	return {
@@ -28,55 +30,51 @@ function escapeRegExp(text) {
 	};
 }
 
-async function ciphers() {
-	const mod = await freshModule("js/games/hacker-flags.js");
-	return { mod, decode: decoderFor(mod) };
-}
+/**
+ * hacker-flags.js is pure — ciphers over constants, nothing to reset — so it is
+ * imported once, statically. A fresh instance per test would buy nothing, and a
+ * computed dynamic import hides the dependency from everyone reading the file,
+ * including the tooling that reports these ciphers as having no consumers.
+ */
+const decode = decoderFor(mod);
 
 suite("games/hacker-flags.js — ciphers", () => {
 	test("rot13 is its own inverse, so peeling a layer twice returns the original", async () => {
-		const { rot13 } = await freshModule("js/games/hacker-flags.js");
-		assert.eq(rot13("flag{three_layers_deep}"), "synt{guerr_ynlref_qrrc}");
-		assert.eq(rot13(rot13("Mixed Case 123!{}")), "Mixed Case 123!{}");
+		assert.eq(mod.rot13("flag{three_layers_deep}"), "synt{guerr_ynlref_qrrc}");
+		assert.eq(mod.rot13(mod.rot13("Mixed Case 123!{}")), "Mixed Case 123!{}");
 	});
 
 	test("caesar round-trips for any shift, including negative and over-long ones", async () => {
-		const { caesar } = await freshModule("js/games/hacker-flags.js");
 		for (const shift of [-7, 0, 7, 13, 26, 33]) {
-			assert.eq(caesar(caesar("AbZ xY9_{", shift), -shift), "AbZ xY9_{", `shift ${shift}`);
+			assert.eq(mod.caesar(mod.caesar("AbZ xY9_{", shift), -shift), "AbZ xY9_{", `shift ${shift}`);
 		}
 	});
 
 	test("caesar leaves non-letters alone, which is what keeps the braces readable", async () => {
-		const { caesar } = await freshModule("js/games/hacker-flags.js");
-		assert.eq(caesar("flag{a_b}", 7), "mshn{h_i}");
+		assert.eq(mod.caesar("flag{a_b}", 7), "mshn{h_i}");
 	});
 
 	test("toHex/fromHex round-trip across the whole printable range", async () => {
-		const { toHex, fromHex } = await freshModule("js/games/hacker-flags.js");
 		const sample = String.fromCharCode(...Array.from({ length: 95 }, (_, i) => 32 + i));
-		assert.eq(fromHex(toHex(sample)), sample);
-		assert.match(toHex("f"), /^[0-9a-f]+$/, "hex must be lower case and unpadded");
+		assert.eq(mod.fromHex(mod.toHex(sample)), sample);
+		assert.match(mod.toHex("f"), /^[0-9a-f]+$/, "hex must be lower case and unpadded");
 	});
 
 	test("fromHex refuses ragged input instead of throwing or inventing a character", async () => {
-		const { fromHex } = await freshModule("js/games/hacker-flags.js");
-		assert.eq(fromHex("6f6"), null, "an odd number of digits is not hex");
-		assert.eq(fromHex("zz"), null, "non-hex digits are not hex");
-		assert.eq(fromHex(""), "", "empty input is empty output, not null");
-		assert.eq(fromHex("66 6c 61 67"), "flag", "spaces and colons are tolerated as separators");
+		assert.eq(mod.fromHex("6f6"), null, "an odd number of digits is not hex");
+		assert.eq(mod.fromHex("zz"), null, "non-hex digits are not hex");
+		assert.eq(mod.fromHex(""), "", "empty input is empty output, not null");
+		assert.eq(mod.fromHex("66 6c 61 67"), "flag", "spaces and colons are tolerated as separators");
 	});
 
 	test("base64 round-trips and reports failure as null", async () => {
-		const { toB64, fromB64 } = await freshModule("js/games/hacker-flags.js");
-		assert.eq(fromB64(toB64("flag{bytes_never_lie}")), "flag{bytes_never_lie}");
-		assert.eq(fromB64("!!!not base64!!!"), null);
+		assert.eq(mod.fromB64(mod.toB64("flag{bytes_never_lie}")), "flag{bytes_never_lie}");
+		assert.eq(mod.fromB64("!!!not base64!!!"), null);
 	});
 });
 
 suite("games/hacker-flags.js — the six flags", () => {
 	test("there are six, each with a distinct code, achievement and payload", async () => {
-		const { mod } = await ciphers();
 		assert.eq(mod.FLAG_COUNT, 6);
 		assert.eq(new Set(mod.FLAGS.map((flag) => flag.id)).size, 6);
 		assert.eq(new Set(mod.FLAGS.map((flag) => flag.code)).size, 6);
@@ -88,7 +86,6 @@ suite("games/hacker-flags.js — the six flags", () => {
 	});
 
 	test("every flag accepts what its own cipher produces", async () => {
-		const { mod, decode } = await ciphers();
 		for (const flag of mod.FLAGS) {
 			const answer = decode[flag.id](flag.payload);
 			assert.ok(typeof answer === "string" && answer.length, `${flag.code} must be decodable by the documented inverse`);
@@ -97,7 +94,6 @@ suite("games/hacker-flags.js — the six flags", () => {
 	});
 
 	test("every flag rejects a near miss, so a record cannot be earned by luck", async () => {
-		const { mod, decode } = await ciphers();
 		for (const flag of mod.FLAGS) {
 			const answer = decode[flag.id](flag.payload);
 			assert.notOk(flag.check(`${answer}x`), `${flag.code} accepted a padded guess`);
@@ -107,7 +103,6 @@ suite("games/hacker-flags.js — the six flags", () => {
 	});
 
 	test("surrounding whitespace is forgiven, since a copied string usually carries some", async () => {
-		const { mod, decode } = await ciphers();
 		for (const flag of mod.FLAGS) {
 			const answer = decode[flag.id](flag.payload);
 			assert.ok(flag.check(`  ${answer}\n`), `${flag.code} rejected a guess with stray whitespace`);
@@ -115,13 +110,11 @@ suite("games/hacker-flags.js — the six flags", () => {
 	});
 
 	test("getFlag falls back to the first flag rather than undefined", async () => {
-		const { mod } = await ciphers();
 		assert.eq(mod.getFlag("no-such-flag").id, mod.FLAGS[0].id);
 		assert.eq(mod.getFlag("hex").id, "hex");
 	});
 
 	test("the credential is exactly the four fragments, hyphenated, in page order", async () => {
-		const { mod } = await ciphers();
 		assert.eq(mod.FRAGMENTS.length, 4);
 		assert.eq(mod.CREDENTIAL, mod.FRAGMENTS.map((f) => f.text).join("-"));
 		assert.ok(mod.FRAGMENTS.every((f) => f.where.length > 10), "every fragment has to say where it hides");
@@ -133,7 +126,6 @@ suite("games/hacker-flags.js — the six flags", () => {
 	 * achievements become free.
 	 */
 	test("no plaintext answer appears in any shipped file", async () => {
-		const { mod, decode } = await ciphers();
 		const sources = await Promise.all([
 			fetchText("js/games/hacker-flags.js"),
 			fetchText("js/games/hacker.js"),
@@ -150,7 +142,6 @@ suite("games/hacker-flags.js — the six flags", () => {
 	});
 
 	test("the four fragment surfaces all still exist in the shipped files", async () => {
-		const { mod } = await ciphers();
 		const html = await fetchText("games.html");
 		const css = await fetchText("css/games.css");
 		const js = await fetchText("js/games/hacker.js");
