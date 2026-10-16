@@ -206,7 +206,18 @@ export async function mountExhibit(gameId) {
 	const container = host(await loadTemplate("../games.html"));
 	const section = container.querySelector(`[data-game="${gameId}"]`);
 	if (!section) throw new Error(`games.html has no [data-game="${gameId}"]`);
+	// The wing ships every game hidden and the router reveals exactly one
+	// (js/modes/games.js). A hidden element has no layout whatsoever, so without
+	// this every rect below is a box of zeros and any geometry assertion passes
+	// without testing anything. Computed-style checks survived; layout did not.
+	section.hidden = false;
 	enhanceSelects(section);
+	// Fail loudly rather than let a zero-size host quietly invalidate every
+	// geometry assertion in a file. Height can come from the static markup, so a
+	// healthy mount always has some.
+	if (!section.getBoundingClientRect().height) {
+		throw new Error(`mounted ${gameId} exhibit has no layout: a hidden host measures only zeros`);
+	}
 
 	const unlocks = [];
 	const api = {
