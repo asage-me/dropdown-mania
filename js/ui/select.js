@@ -400,6 +400,10 @@ class ArchiveSelect {
 		this.native.style.removeProperty("display");
 		this.native.removeAttribute("aria-hidden");
 		this.native.removeAttribute("tabindex");
+		// The marker is what enhanceSelects() skips, so leaving it behind would
+		// mean a destroyed select can never be upgraded again — destroy() would
+		// only be safe when the element is about to be thrown away.
+		this.native.removeAttribute("data-archive-select");
 		registry.delete(this.native);
 	}
 
