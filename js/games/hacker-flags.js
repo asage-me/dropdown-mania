@@ -106,8 +106,10 @@ export const FLAGS = [
 		payload: null,
 		brief: "One fragment in the HTML source, one in a data attribute on this panel, one logged to the console at load, one in a CSS custom property. Recover all four, then submit them in order, hyphenated.",
 		key: "Right-click → View source, then inspect Elements, Console and Styles.",
-		normalise: (guess) => guess.toUpperCase(),
-		check: (guess) => guess.toUpperCase() === CREDENTIAL,
+		// Trimmed like every other flag: this answer is assembled by hand from four
+		// places, so a stray space on the end is the normal way to get it wrong.
+		normalise: (guess) => guess.trim().toUpperCase(),
+		check: (guess) => guess.trim().toUpperCase() === CREDENTIAL,
 	},
 	{
 		id: "base64",
