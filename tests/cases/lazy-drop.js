@@ -1,11 +1,13 @@
 /**
  * DD-014 as a mounted exhibit.
  *
- * Two things are pinned here that were both real bugs. The save is versioned,
- * and a mismatched version has to be discarded rather than half-read. And the
- * banked total used to live in the statline, where a nine-figure score widened
- * the head and shoved the rest of the page sideways — so its position is now
- * asserted, not eyeballed.
+ * Three things are pinned here and all three were real bugs. The save is
+ * versioned, and a mismatched version has to be discarded rather than half-read.
+ * The banked total used to live in the statline, where a nine-figure score
+ * widened the head and shoved the rest of the page sideways — so its position is
+ * now asserted, not eyeballed. And an open tier menu painted under the tiers
+ * below it, because a leftover transform turned every tier into a stacking
+ * context the menu's own z-index could not escape.
  */
 
 import {
@@ -139,6 +141,70 @@ suite("games/lazy-drop.js", () => {
 				assert.ok(select.hasAttribute("data-archive-select"), `${select.id} was never upgraded`);
 				assert.match(select.options[0].textContent, /Commit/, `${select.id} has no neutral first option`);
 			}
+		} finally { g.destroy(); }
+	});
+
+	/**
+	 * Every tier is its own stacking context — `tier-arrive` leaves a filled
+	 * transform behind, and any non-none transform creates one — so a listbox's
+	 * z-index cannot escape the tier it belongs to. Tiers then paint in DOM
+	 * order, and because they wrap into rows, an open menu on tier 1 overlaps
+	 * tier 2 and used to be painted under it. Pinned at both levels: the rule
+	 * that fixes it, and the paint order the player actually sees.
+	 */
+	test("an open menu is not buried under the tiers that follow it", async () => {
+		// Read the live version rather than hard-coding it, so a save-version
+		// bump cannot quietly turn this into a test of the discard path.
+		const probe = await mountExhibit("lazy-drop");
+		probe.destroy();
+		const { version } = readStore("lazy-drop");
+
+		writeSave({
+			version, points: 0, power: 1, multiplier: 1, autoRate: 0, tiers: 7,
+			powerCost: 100, autoCost: 500, tierCost: 1000, multiplierCost: 5000,
+			selections: 0, jackpots: 0, log: [], lastSeen: Date.now(),
+		});
+
+		const g = await lazy();
+		try {
+			const tiers = [...g.root.querySelectorAll(".tier")];
+			assert.eq(tiers.length, 7, "a save that owns seven tiers should render seven");
+
+			// The overlap only exists once the tiers wrap, so make it happen
+			// rather than hoping the viewport cooperates.
+			g.container.style.width = "620px";
+			await tick(30);
+			// And put the tier at the top of the viewport: a menu with no room
+			// below flips up, where it overlaps nothing and proves nothing.
+			tiers[0].scrollIntoView({ block: "start", behavior: "instant" });
+			await tick(30);
+
+			tiers[0].querySelector(".sel__trigger").click();
+			await tick(60);
+			const menu = tiers[0].querySelector(".sel__menu");
+			assert.notOk(menu.hidden, "the menu did not open");
+
+			const level = (el) => {
+				const value = getComputedStyle(el).zIndex;
+				return value === "auto" ? 0 : Number(value);
+			};
+			assert.ok(level(tiers[0]) > level(tiers[1]), `the tier in use sits at ${level(tiers[0])}, its neighbour at ${level(tiers[1])}`);
+
+			const trigger = tiers[0].querySelector(".sel__trigger").getBoundingClientRect();
+			const mr = menu.getBoundingClientRect();
+			assert.ok(mr.top >= trigger.bottom - 1, "the menu opened above its trigger, so it cannot overlap the tiers below");
+
+			let overlaps = 0;
+			tiers.slice(1).forEach((other, offset) => {
+				const r = other.getBoundingClientRect();
+				const ox = Math.max(mr.x, r.x), oy = Math.max(mr.y, r.y);
+				const ex = Math.min(mr.right, r.right), ey = Math.min(mr.bottom, r.bottom);
+				if (ex <= ox + 2 || ey <= oy + 2) return;
+				overlaps += 1;
+				const hit = document.elementFromPoint((ox + ex) / 2, (oy + ey) / 2);
+				assert.ok(hit && menu.contains(hit), `tier ${offset + 2} paints over the open menu`);
+			});
+			assert.ok(overlaps > 0, "the tiers never overlapped, so nothing was tested");
 		} finally { g.destroy(); }
 	});
 

@@ -553,6 +553,17 @@
 	animation-delay: calc(var(--tier-index, 1) * 70ms);
 }
 
+/* "tier-arrive" fills a transform for ever — fill-mode both leaves the end
+   value, matrix(1,0,0,1,0,0), in place, and any non-none transform makes an
+   element its own stacking context. So the listbox's z-index: 60 cannot escape
+   its tier, and the tiers themselves paint in DOM order: because they wrap into
+   rows, an open menu on tier 1 overlaps tier 2 and is painted under it. Lift the
+   tier in use above its siblings; z-index applies because a tier is a flex item,
+   so it needs no position of its own. */
+.tier:has(.is-open) {
+	z-index: 1;
+}
+
 @keyframes tier-arrive {
 	from { opacity: 0; transform: translateY(10px) scale(0.94); }
 	to   { opacity: 1; transform: translateY(0) scale(1); }
