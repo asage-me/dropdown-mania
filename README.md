@@ -50,7 +50,7 @@ Every exhibit has an accession number, and every accession number is a route: `#
 | Accession | Game | Mechanic |
 | --- | --- | --- |
 | DD-012 | Find the Path | Five dropdowns, one correct sequence, yes/no feedback only. **Advanced** mode drifts the menus while you aim. |
-| DD-013 | Hacker Puzzle | A password hidden in the page itself — clues live in comments, `data-*`, stylesheets and the console. |
+| DD-013 | Hacker Puzzle | Six flags hidden six ways: one credential split across four devtools surfaces, then base64, a Caesar shift whose key is left in the page, raw hex, a reversed ROT13, and all three stacked. No plaintext answer is stored anywhere in the source. |
 | DD-014 | Lazy Drop | An idle game measured in selections: tiers, upgrades, and a banked ledger. |
 
 ### Wing III — Retro 1999 (3 exhibits)
@@ -68,20 +68,29 @@ Preserved, not mocked: the wing is loud on purpose, and still keeps its landmark
 
 ## Records
 
-Nine records are earnable across all three wings. They are kept in this browser only, and the
-record book opens from the footer, the home page, or the `R` key.
+Seventeen records are earnable across all three wings. They are kept in this browser only, and the
+record book opens from the footer, the home page, or the `R` key. The book counts them from the
+catalogue rather than spelling the number out, so it cannot go stale again.
 
 | Accession | Record | Earned by |
 | --- | --- | --- |
 | AC-01 | Path Found | Clearing Find the Path on standard |
 | AC-02 | Steady Hand | Clearing Find the Path while the menus move |
-| AC-03 | Root Access | Recovering the hidden password |
-| AC-04 | Read the Fine Source | Finding every hidden clue before guessing |
+| AC-03 | Root Access | Recovering the hidden credential (FLAG-01) |
+| AC-04 | Read the Fine Source | Finding all four fragments before guessing |
 | AC-05 | Point Collector | Banking 1,000 points in Lazy Drop |
 | AC-06 | Small Print | Raising Lazy Drop to tier 5 |
 | AC-07 | Signed the Guestbook | Leaving a mark in 1999 |
 | AC-08 | Catalogue Read | Opening every exhibit in Education |
 | AC-09 | Full Tour | Visiting all three wings in one sitting |
+| AC-10 | Lightning Drop | Picking the one prize row out of the Long Menu's 500 |
+| AC-11 | The Whole Shelf | Clearing all fifty question sets in Find the Path |
+| AC-12 | Not Encryption | Decoding the base64 packet (FLAG-02) |
+| AC-13 | Shifted Thinking | Finding the shift key in the page and undoing the intercept (FLAG-03) |
+| AC-14 | Byte Reader | Reading the hex flag two digits at a time (FLAG-04) |
+| AC-15 | Read It Backwards | Undoing the ROT13 and the reversal in the right order (FLAG-05) |
+| AC-16 | Three Layers Deep | Stripping hex, then base64, then ROT13 off the last flag (FLAG-06) |
+| AC-17 | Root Kit | Recovering all six flags |
 
 ---
 

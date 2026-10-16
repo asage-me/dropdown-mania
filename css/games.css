@@ -308,14 +308,31 @@
 
 /* ---------- DD-013 Hacker ---------- */
 .terminal {
+	position: relative;
+	overflow: hidden;
 	margin: 24px 0 18px;
 	padding: 18px 20px;
+	min-height: 190px;
 	background: var(--surface-sunken);
 	border: 1px solid var(--border-strong);
 	border-left: 3px solid var(--patina);
 }
 
+/* The rain lives inside the terminal — the one surface dark enough in both
+   themes to carry it — and sits under the text at half opacity. It takes no
+   pointer events, so the lines above it stay selectable. */
+.terminal__rain {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0.45;
+	pointer-events: none;
+}
+
 .terminal__line {
+	position: relative;
+	z-index: 1;
 	margin: 0 0 6px;
 	font-family: var(--font-mono);
 	font-size: 0.78rem;
@@ -327,7 +344,86 @@
 
 .terminal__line--hint { color: var(--accent); }
 
+.terminal__line--payload {
+	margin-top: 12px;
+	color: var(--text);
+	word-break: break-all;
+}
+
 .terminal.is-open { border-left-color: var(--accent); }
+
+.hk-target {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 10px 12px;
+	margin: 22px 0 0;
+}
+
+.hk-target__label {
+	font-family: var(--font-mono);
+	font-size: 0.6rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.hk-target .sel { flex: 0 1 340px; min-width: 220px; }
+
+.hk-target__brief {
+	flex: 1 1 200px;
+	font-size: 0.92rem;
+	font-style: italic;
+	color: var(--text-muted);
+}
+
+.flags {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 1px;
+	margin: 20px 0 22px;
+	list-style: none;
+	background: var(--border);
+	border: 1px solid var(--border);
+}
+
+.flag {
+	display: grid;
+	grid-template-columns: 18px auto 1fr;
+	grid-template-rows: auto auto;
+	gap: 2px 10px;
+	align-items: center;
+	padding: 11px 14px;
+	background: var(--panel);
+}
+
+.flag__mark {
+	grid-row: 1 / -1;
+	width: 12px;
+	height: 12px;
+	border: 1px solid var(--border-strong);
+}
+
+.flag__code {
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	letter-spacing: 0.1em;
+	color: var(--text-muted);
+}
+
+.flag__name { font-size: 0.92rem; }
+
+.flag__state {
+	grid-column: 2 / -1;
+	font-family: var(--font-mono);
+	font-size: 0.6rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.flag.is-cleared .flag__mark { background: var(--accent); border-color: var(--accent); }
+.flag.is-cleared .flag__state { color: var(--accent); }
 
 /* DD-013 · fragment 4 of 4. Never rendered on screen — it exists only in the
    Styles pane, which is exactly where the puzzle wants you to look. */

@@ -10,8 +10,8 @@ const KEY = "achievements";
 const ACHIEVEMENTS = {
 	"path-first": { accession: "AC-01", title: "Path Found", note: "Cleared Find the Path on standard." },
 	"path-advanced": { accession: "AC-02", title: "Steady Hand", note: "Cleared Find the Path while the menus moved." },
-	"hacker-granted": { accession: "AC-03", title: "Root Access", note: "Recovered the hidden password." },
-	"hacker-all-clues": { accession: "AC-04", title: "Read the Fine Source", note: "Found every hidden clue before guessing." },
+	"hacker-granted": { accession: "AC-03", title: "Root Access", note: "Assembled the credential hidden across four surfaces." },
+	"hacker-all-clues": { accession: "AC-04", title: "Read the Fine Source", note: "Found all four fragments before submitting them." },
 	"lazy-1k": { accession: "AC-05", title: "Point Collector", note: "Banked 1,000 points in Lazy Drop." },
 	"lazy-tier-5": { accession: "AC-06", title: "Small Print", note: "Raised Lazy Drop to tier 5." },
 	"retro-signed": { accession: "AC-07", title: "Signed the Guestbook", note: "Left a mark in 1999." },
@@ -19,6 +19,12 @@ const ACHIEVEMENTS = {
 	"wing-visitor": { accession: "AC-09", title: "Full Tour", note: "Visited all three wings in one sitting." },
 	"lazy-jackpot": { accession: "AC-10", title: "Lightning Drop", note: "Picked the one prize row out of the Long Menu's 500." },
 	"path-catalogue": { accession: "AC-11", title: "The Whole Shelf", note: "Cleared all fifty question sets in Find the Path." },
+	"hacker-base64": { accession: "AC-12", title: "Not Encryption", note: "Decoded the base64 packet in the Hacker Puzzle." },
+	"hacker-caesar": { accession: "AC-13", title: "Shifted Thinking", note: "Found the key in the page and shifted the intercept back." },
+	"hacker-hex": { accession: "AC-14", title: "Byte Reader", note: "Read the hex flag two digits at a time." },
+	"hacker-mirror": { accession: "AC-15", title: "Read It Backwards", note: "Undid the ROT13 and the reversal, in the right order." },
+	"hacker-deep": { accession: "AC-16", title: "Three Layers Deep", note: "Stripped hex, then base64, then ROT13 off the last flag." },
+	"hacker-all": { accession: "AC-17", title: "Root Kit", note: "Recovered all six flags from the Hacker Puzzle." },
 };
 
 // No reset(): the record book is append-only, and nothing in the UI clears it.

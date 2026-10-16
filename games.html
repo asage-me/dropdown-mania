@@ -71,21 +71,31 @@
     <div class="game__head">
         <div>
             <h3 id="hacker-h">Hacker Puzzle</h3>
-            <p>The credential is already in this page — one fragment in the source, one in a data
-                attribute, one in the console, one in a CSS rule. Open devtools, collect all four,
-                then assemble them in order.</p>
+            <p>Six flags are buried in this page. One is split across four devtools surfaces; the rest
+                are encoded, shifted, spelled in bytes, mirrored, and one is wrapped three times deep.
+                Nothing here stores an answer in the clear — the page holds the puzzle, not the key.</p>
         </div>
         <dl class="statline">
+            <div><dt>Flags</dt><dd><span data-hk-flags-cleared>0</span> / 6</dd></div>
             <div><dt>Clues</dt><dd><span data-hk-found>0</span> / 4</dd></div>
             <div><dt>Attempts</dt><dd data-hk-attempts>0</dd></div>
         </dl>
     </div>
 
     <div class="terminal" data-hk-terminal data-hk-dom-clue="fragment 2 of 4 :: -M4N-">
+        <canvas class="terminal__rain" data-hk-rain aria-hidden="true"></canvas>
         <p class="terminal__line">$ session opened. operator unknown.</p>
-        <p class="terminal__line">$ four fragments are embedded in this document. recover them, then assemble.</p>
-        <p class="terminal__line terminal__line--dim">tip: view source, then inspect Elements, Console and Styles.</p>
+        <p class="terminal__line">$ six flags are embedded in this document. recover them one at a time.</p>
+        <p class="terminal__line terminal__line--payload" data-hk-payload></p>
     </div>
+
+    <div class="hk-target">
+        <label class="hk-target__label" for="hk-flag">Target</label>
+        <select id="hk-flag" data-hk-flag></select>
+        <p class="hk-target__brief" data-hk-brief></p>
+    </div>
+
+    <ul class="flags" data-hk-flags></ul>
 
     <ul class="clues" data-hk-clues>
         <li class="clue" data-clue="source"><span class="clue__mark" aria-hidden="true"></span><span class="clue__name">Source comment</span><span class="clue__state">Not found</span></li>
@@ -96,9 +106,9 @@
 
     <!-- fragment 1 of 4 :: 0P3N -->
     <form class="auth" data-hk-form>
-        <label class="auth__label" for="hk-password">Assemble the credential</label>
+        <label class="auth__label" for="hk-password">Submit the credential</label>
         <input class="auth__input" id="hk-password" type="text" autocomplete="off" spellcheck="false"
-               placeholder="four fragments, in order">
+               placeholder="flag{…}">
         <button type="submit" class="btn btn--solid">Authenticate</button>
     </form>
     <p class="auth__result" data-hk-result role="status" aria-live="polite"></p>
