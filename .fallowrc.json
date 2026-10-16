@@ -5,7 +5,13 @@
 	// its own: the runtime roots are the <script type="module"> tag in index.html and
 	// the <link rel="stylesheet"> tags it carries. Declared here so the import graph
 	// has roots and nothing is misreported as unreachable.
-	"entry": ["js/main.js", "css/*.css"],
+	//
+	// tests/harness.js and tests/cases/*.js are roots for the same reason: the suite
+	// at /tests/ is entered through the inline <script type="module"> in
+	// tests/index.html, which is not discoverable either. Without them the whole test
+	// tree reads as unreachable, and the cipher helpers it imports with it — nine
+	// "unused files" and eight "unused exports" that are all one false positive.
+	"entry": ["js/main.js", "css/*.css", "tests/harness.js", "tests/cases/*.js"],
 
 	// The wing pages are pulled in at runtime by js/core/templates.js, so they are
 	// reachable by fetch rather than by import.
