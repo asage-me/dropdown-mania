@@ -160,21 +160,39 @@ export default {
 				if (index === state.levels.length - 1) {
 					win();
 				} else {
+					clearVerdict(index + 1);
 					selects[index + 1].step.hidden = false;
 					status.textContent = levelLine(index + 1);
 					selects[index + 1].select.focus();
 				}
 			} else {
-				verdict.textContent = "Wrong — the board resets. Your notes keep what you solved.";
+				verdict.textContent = "Wrong.";
 				verdict.className = "path__verdict is-wrong";
 				resetBoard({ keepVerdictOn: index });
+				// Only level one is still on screen after a reset, so a verdict written on
+				// the row that earned it goes unread for levels two to five. The status
+				// line is where the "no" has to be said: it never hides, and it is the
+				// live region, so it is announced too.
+				status.textContent = `No — that is not the one. Back to level 1 of ${state.levels.length}. Your notes keep what you solved.`;
 			}
 		}
 
 		/**
-		 * Clear the run. The row that was just answered wrongly keeps its verdict:
-		 * the game's only contract is yes or no, and clearing the message in the
-		 * same tick that wrote it left "no" permanently invisible.
+		 * Wipe one row's verdict. A row that was answered wrongly keeps its "no" for
+		 * as long as it is on screen, then loses it the moment it is re-armed — by
+		 * then it has been read, and showing it again reads as a verdict on the
+		 * answer you are about to give rather than the one you already gave.
+		 */
+		function clearVerdict(index) {
+			const verdict = selects[index].step.querySelector("[data-verdict]");
+			verdict.textContent = "";
+			verdict.className = "path__verdict";
+		}
+
+		/**
+		 * Clear the run. The row that was just answered wrongly keeps its short "no"
+		 * rather than being blanked in the same tick that wrote it; the explanation
+		 * belongs to the status line, which survives the reset.
 		 */
 		function resetBoard({ keepVerdictOn = -1 } = {}) {
 			state.solved = [];
@@ -187,9 +205,7 @@ export default {
 				step.classList.remove("is-solved");
 				step.hidden = index > 0;
 				if (index === keepVerdictOn) return;
-				const verdict = step.querySelector("[data-verdict]");
-				verdict.textContent = "";
-				verdict.className = "path__verdict";
+				clearVerdict(index);
 			});
 			paintNotes();
 			status.textContent = levelLine(0);
