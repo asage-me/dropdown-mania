@@ -168,7 +168,7 @@ export default {
 			} else {
 				verdict.textContent = "Wrong.";
 				verdict.className = "path__verdict is-wrong";
-				resetBoard({ keepVerdictOn: index });
+				resetBoard({ keepVerdictOn: index, keepSolved: true });
 				// Only level one is still on screen after a reset, so a verdict written on
 				// the row that earned it goes unread for levels two to five. The status
 				// line is where the "no" has to be said: it never hides, and it is the
@@ -193,9 +193,13 @@ export default {
 		 * Clear the run. The row that was just answered wrongly keeps its short "no"
 		 * rather than being blanked in the same tick that wrote it; the explanation
 		 * belongs to the status line, which survives the reset.
+		 *
+		 * A miss keeps `solved`, because the status line promises exactly that —
+		 * "your notes keep what you solved" — and the notes are the only thing that
+		 * makes a fifth attempt different from the first. A restart clears it.
 		 */
-		function resetBoard({ keepVerdictOn = -1 } = {}) {
-			state.solved = [];
+		function resetBoard({ keepVerdictOn = -1, keepSolved = false } = {}) {
+			if (!keepSolved) state.solved = [];
 			state.startedAt = 0;
 			state.elapsed = 0;
 			stopClock();
