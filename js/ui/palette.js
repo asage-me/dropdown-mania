@@ -152,13 +152,19 @@ export function createPalette({ navigate }) {
 export function openRecords() {
 	const dialog = ensureDialog("records", "records", `
 		<h2 class="records__title">Record book</h2>
-		<p class="records__lead">Nine records, earned across all three wings. Stored in this browser only.</p>
+		<p class="records__lead"></p>
 		<ul class="records__list"></ul>
 		<form method="dialog"><button class="btn btn--sm" type="submit">Close</button></form>`);
 
 	const listEl = dialog.querySelector(".records__list");
+	const records = listRecords();
+	// Counted, never spelled out: the last time this was written as a word, the
+	// catalogue grew past it and the book announced nine records while showing
+	// seventeen.
+	dialog.querySelector(".records__lead").textContent =
+		`${records.length} records, earned across all three wings. Stored in this browser only.`;
 	listEl.innerHTML = "";
-	listRecords().forEach((record) => {
+	records.forEach((record) => {
 		const item = document.createElement("li");
 		item.className = record.unlocked ? "record is-unlocked" : "record";
 		item.innerHTML = `
