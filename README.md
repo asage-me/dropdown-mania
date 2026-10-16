@@ -25,6 +25,28 @@ compile and nothing to install.
 
 ---
 
+## Tests
+
+`/tests/` is a page, not a toolchain. It has no dependencies because the site has no dependencies,
+and adding a bundler to test eleven files would cost more than it saves.
+
+```bash
+python -m http.server 8000     # then open http://localhost:8000/tests/
+```
+
+Assertions over the storage layer, the dropdown widget, the record book, the cipher data, and all
+three games mounted into the real `games.html`. `?json` prints the report as JSON.
+
+Two things it is deliberately arranged to catch:
+
+- **Docs that have drifted from data.** The record book once announced nine records while listing
+  seventeen. The README's counts are now checked against the catalogue and the achievement list.
+- **Answers leaking into the source.** DD-013 hides six flags, so a test decodes each one at run
+  time and asserts the plaintext appears in no shipped file. The suite never writes an answer down,
+  which is why it can ship without becoming the answer key.
+
+---
+
 ## The collection
 
 Every exhibit has an accession number, and every accession number is a route: `#/education/dd-006`.

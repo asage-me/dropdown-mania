@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Tests — The Dropdown Archive</title>
+    <!-- The shipped stylesheets, so a layout assertion measures the real CSS. -->
+    <link rel="stylesheet" href="../css/tokens.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/nav.css">
+    <link rel="stylesheet" href="../css/select.css">
+    <link rel="stylesheet" href="../css/games.css">
+    <style>
+        /* The runner's own chrome, declared last so it survives whatever the
+           site stylesheets do to p, h2 and body. A stylesheet that breaks the
+           report is still visible; a stylesheet that breaks an exhibit is
+           caught by the layout assertions. */
+        body {
+            margin: 0;
+            padding: 32px 24px 96px;
+            background: #12151a;
+            color: #e6e9ec;
+            font: 14px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+        }
+
+        main { max-width: 76ch; margin: 0 auto; }
+
+        h1 { font-size: 1.3rem; letter-spacing: 0.02em; margin: 0 0 4px; }
+        h2 { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: #8b96a1; margin: 28px 0 8px; }
+        p { margin: 0; }
+        .lede { color: #8b96a1; margin-bottom: 8px; }
+
+        .row { display: grid; grid-template-columns: 44px 1fr; gap: 10px; padding: 3px 0; border-bottom: 1px solid #1e242b; align-items: baseline; }
+        .row b { font-size: 0.68rem; letter-spacing: 0.1em; color: #4ec98a; }
+        .row.is-fail b { color: #ff6b6b; }
+        .row code { grid-column: 2; color: #ffb454; word-break: break-word; }
+        .summary { margin-top: 22px; font-weight: 700; color: #4ec98a; }
+        .summary.is-fail { color: #ff6b6b; }
+
+        /* Games measure their own subtree, so the host has to be laid out. */
+        .test-host { display: block; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>The Dropdown Archive — tests</h1>
+        <p class="lede">No build, no dependencies. Serve the repo and open this page:
+            <code>python -m http.server 8000</code> then <code>/tests/</code>.</p>
+        <div data-report></div>
+    </main>
+
+    <script type="module">
+        import { run } from "./harness.js";
+        import "./cases/store.js";
+        import "./cases/ciphers.js";
+        import "./cases/achievements.js";
+        import "./cases/select.js";
+        import "./cases/hacker.js";
+        import "./cases/find-path.js";
+        import "./cases/lazy-drop.js";
+        import "./cases/docs.js";
+
+        await run();
+    </script>
+</body>
+</html>
