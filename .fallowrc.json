@@ -1,8 +1,9 @@
 {
 	"$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
 
-	// No build step and no package.json, so Fallow cannot discover an entry point on
-	// its own: the runtime roots are the <script type="module"> tag in index.html and
+	// No build step, and the only package.json in the repo (tests/package.json) declares a
+	// module type instead of an entry point, so Fallow still cannot discover one on its
+	// own: the runtime roots are the <script type="module"> tag in index.html and
 	// the <link rel="stylesheet"> tags it carries. Declared here so the import graph
 	// has roots and nothing is misreported as unreachable.
 	//
@@ -11,6 +12,10 @@
 	// tests/index.html, which is not discoverable either. Without them the whole test
 	// tree reads as unreachable, and the cipher helpers it imports with it — nine
 	// "unused files" and eight "unused exports" that are all one false positive.
+	//
+	// Re-checked with `npx fallow dead-code` (v2.91.0) after tests/package.json arrived: same
+	// 26 entry points, same single finding (js/games/hacker.js's resetRunState, which a test
+	// reaches through a dynamic import — see that report). The one key moves nothing here.
 	"entry": ["js/main.js", "css/*.css", "tests/harness.js", "tests/cases/*.js"],
 
 	// The wing pages are pulled in at runtime by js/core/templates.js, so they are

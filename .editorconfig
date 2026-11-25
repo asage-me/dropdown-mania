@@ -1,0 +1,29 @@
+# The conventions this project already follows, written down where an editor can
+# read them. Nothing here is enforced by a tool: the site has no build step and
+# no reason to acquire one. EditorConfig is the exception, because every editor
+# that matters reads this file and none of them need a package installed.
+#
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+# Committed blobs are LF on every platform. Line endings that depend on each
+# clone's git config are how a diff turns into whitespace noise.
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+# js/ and css/ indent with tabs, and every file in both trees already does.
+indent_style = tab
+
+[*.{html,md}]
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+# Two trailing spaces are a line break in markdown, not sloppiness.
+trim_trailing_whitespace = false

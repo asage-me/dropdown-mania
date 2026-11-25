@@ -1,0 +1,176 @@
+# The site has no build step, so neither does CI: serve the files, point a
+# headless Chrome at them, and read what the test page prints. Nothing is
+# installed and nothing is compiled — checkout, serve, assert.
+#
+# The two commands below are the ones in README.md, so a contributor can run
+# exactly what the runner runs. `/tests/?json` is the machine-readable report;
+# the wing smoke walks every route and fails on an uncaught error, an empty wing
+# or a route that mounts the wrong one.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PORT: "8123"
+
+jobs:
+  browser:
+    name: Test suite and wing smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      # Pinned to a commit rather than a moving tag: this workflow runs the repo's
+      # own code in a browser, so what it checks out is part of the trust chain.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Find the browser
+        run: |
+          set -euo pipefail
+          for binary in google-chrome google-chrome-stable chromium chromium-browser; do
+            if command -v "$binary" > /dev/null 2>&1; then
+              echo "CHROME_PATH=$(command -v "$binary")" >> "$GITHUB_ENV"
+              "$binary" --version
+              exit 0
+            fi
+          done
+          echo "::error::no Chrome or Chromium on this runner"
+          exit 1
+
+      - name: Serve the site
+        run: |
+          set -euo pipefail
+          python3 -m http.server "$PORT" --bind 127.0.0.1 > /tmp/server.log 2>&1 &
+          for _ in $(seq 1 50); do
+            if curl -fsS "http://127.0.0.1:$PORT/index.html" > /dev/null 2>&1; then exit 0; fi
+            sleep 0.2
+          done
+          echo "::error::the static server never answered"
+          cat /tmp/server.log
+          exit 1
+
+      - name: Run the suite
+        run: |
+          set -euo pipefail
+          # --virtual-time-budget drains virtual time rather than wall time, which is
+          # how the suite's own timers (game clocks, mount ticks) reach zero before
+          # the DOM is dumped. 120s of budget covers a run that takes ~10s real.
+          "$CHROME_PATH" --headless --no-sandbox --disable-gpu \
+            --virtual-time-budget=120000 \
+            --dump-dom "http://127.0.0.1:$PORT/tests/?json" > /tmp/suite.html
+
+          total=$(sed -n 's/.*"total": *\([0-9]\{1,\}\).*/\1/p' /tmp/suite.html | head -n1)
+          failed=$(sed -n 's/.*"failed": *\([0-9]\{1,\}\).*/\1/p' /tmp/suite.html | head -n1)
+
+          # A test file that fails to import registers nothing, and "0 of 0 passing"
+          # looks like a green run forever. Refuse to be that quiet.
+          if [ -z "$total" ] || [ "$total" -eq 0 ]; then
+            echo "::error::the report claims ${total:-nothing} tests, so the suite never ran"
+            head -c 800 /tmp/suite.html
+            exit 1
+          fi
+
+          if [ "$failed" != "0" ]; then
+            echo "::error::$failed of $total tests are failing"
+            grep -o '"message": "[^"]\{1,\}"' /tmp/suite.html | head -n 40 || true
+            exit 1
+          fi
+
+          echo "$total tests passing"
+
+      - name: Smoke every route
+        run: |
+          set -euo pipefail
+          check() {
+            local route="$1" expected="$2"
+            local dump error
+            dump=$(mktemp)
+            error=$(mktemp)
+
+            "$CHROME_PATH" --headless --no-sandbox --disable-gpu --enable-logging=stderr \
+              --virtual-time-budget=30000 \
+              --dump-dom "http://127.0.0.1:$PORT/index.html${route}" > "$dump" 2> "$error"
+
+            if ! grep -q "data-mode=\"${expected}\"" "$dump"; then
+              echo "::error::${route} did not mount the ${expected} wing"
+              head -c 600 "$dump"
+              exit 1
+            fi
+            if grep -q "Wing unavailable" "$dump"; then
+              echo "::error::${route} could not load its wing template"
+              exit 1
+            fi
+            if grep -q "Uncaught" "$error"; then
+              echo "::error::${route} threw on mount"
+              grep -m 5 "Uncaught" "$error"
+              exit 1
+            fi
+
+            echo "${route} -> ${expected}"
+            rm -f "$dump" "$error"
+          }
+
+          check "#/" home
+          check "#/education" education
+          check "#/education/dd-006" education
+          check "#/games" games
+          check "#/games/find-path" games
+          check "#/games/hacker" games
+          check "#/games/lazy-drop" games
+          check "#/retro" retro
+          check "#/retro/dd-016" retro
+          # An unknown wing is this site's 404. It has to land somewhere on purpose.
+          check "#/no-such-wing" home
+
+      - name: Hunt the flag answers over the whole checkout
+        run: |
+          set -euo pipefail
+
+          # The browser suite can only read what a page can reach, which is every
+          # file the site actually loads plus whatever a crawl can name — not this
+          # workflow, not `.editorconfig`, not a stray file sitting untracked next to
+          # a checkout. A `git ls-files` sweep covers the rest. Same answers, so the
+          # two guards cannot disagree about what a leak is.
+          node tests/leak-check.mjs
+
+      - name: Check the two rules a linter would usually own
+        run: |
+          set -euo pipefail
+
+          # Syntax, every module, no toolchain installed. `--check` reads CommonJS,
+          # so the file is handed over under an .mjs name rather than passed a flag
+          # it does not have. This is the only reason Node appears anywhere in this
+          # repo, and it is a CI-only reason: nothing here is used by the site.
+          staged=$(mktemp --suffix=.mjs)
+          # `.mjs` is in here because the shell sweep is one, and a CI script that
+          # only syntax-checks the site's own files can break on the step that
+          # protects the site.
+          for file in $(git ls-files "*.js" "*.mjs"); do
+            cp "$file" "$staged"
+            if ! node --check "$staged"; then
+              echo "::error::$file does not parse"
+              exit 1
+            fi
+          done
+          rm -f "$staged"
+          echo "every tracked .js and .mjs file parses"
+
+          # A site that teaches web practice should not evaluate code it assembled at
+          # runtime. One grep, and the kind of thing that arrives quietly later.
+          sinks=$(grep -rnE '\beval\(|new Function\(|document\.write\(|insertAdjacentHTML\(' js || true)
+          if [ -n "$sinks" ]; then
+            echo "::error::dynamic code execution found in js/"
+            echo "$sinks"
+            exit 1
+          fi
+          echo "no dynamic-code sinks in js/"
