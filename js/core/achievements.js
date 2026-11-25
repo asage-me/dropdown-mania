@@ -11,7 +11,7 @@ const ACHIEVEMENTS = {
 	"path-first": { accession: "AC-01", title: "Path Found", note: "Cleared Find the Path on standard." },
 	"path-advanced": { accession: "AC-02", title: "Steady Hand", note: "Cleared Find the Path while the menus moved." },
 	"hacker-granted": { accession: "AC-03", title: "Root Access", note: "Assembled the credential hidden across four surfaces." },
-	"hacker-all-clues": { accession: "AC-04", title: "Read the Fine Source", note: "Found all four fragments before submitting them." },
+	"hacker-all-clues": { accession: "AC-04", title: "Read the Fine Source", note: "Held all four fragments, found or handed over." },
 	"lazy-1k": { accession: "AC-05", title: "Point Collector", note: "Banked 1,000 points in Lazy Drop." },
 	"lazy-tier-5": { accession: "AC-06", title: "Small Print", note: "Raised Lazy Drop to tier 5." },
 	"retro-signed": { accession: "AC-07", title: "Signed the Guestbook", note: "Left a mark in 1999." },

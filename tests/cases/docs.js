@@ -72,6 +72,24 @@ suite("documentation stays true to the code", () => {
 		}
 	});
 
+	/**
+	 * DD-013's row spells two counts out in prose, which makes them the last hand
+	 * -maintained game facts in this file: how many flags there are, and how many
+	 * surfaces the first flag's credential is split across. Both are data in
+	 * js/games/hacker-flags.js, and a fifth surface quietly added there would leave
+	 * the README describing a game with one fewer hiding place than it has.
+	 */
+	test("the README's hacker row still counts the flags and the surfaces right", async () => {
+		const readme = await fetchText("README.md");
+		const { FLAG_COUNT, FRAGMENTS } = await freshModule("js/games/hacker-flags.js");
+		const row = readme.split(/\r?\n/).find((line) => line.includes("| DD-013 |"));
+		assert.ok(row, "README.md no longer has a DD-013 row to read the counts from");
+		const spelled = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+		assert.ok(Math.max(FLAG_COUNT, FRAGMENTS.length) < spelled.length, "this test needs more number words");
+		assert.match(row, new RegExp(`${spelled[FLAG_COUNT]} flags\\b`, "i"), `the board holds ${FLAG_COUNT} flags and the README spells a different number`);
+		assert.includes(row, `${spelled[FRAGMENTS.length]} devtools surfaces`, `the credential is split across ${FRAGMENTS.length} surfaces, and the README says otherwise`);
+	});
+
 	test("the wing blurbs on the home page still describe three wings", async () => {
 		const home = await fetchText("home.html");
 		const { WINGS } = await freshModule("js/core/catalogue.js");
@@ -86,6 +104,50 @@ suite("documentation stays true to the code", () => {
 		for (const file of files) {
 			const source = await fetchText(file);
 			assert.notMatch(source, /hidden password/i, `${file} still describes one password, not six flags`);
+		}
+	});
+
+	/**
+	 * A hash is either a route or an in-page anchor, and both halves have to be
+	 * true in the markup: `#/…` must be a route the router knows, and a bare
+	 * fragment must name an id in the same file, or the click does nothing at all.
+	 * The exhibit index used to be entirely the second kind and read as broken.
+	 */
+	test("every fragment link is either a real route or a real anchor", async () => {
+		const files = ["index.html", "home.html", "education.html", "games.html", "retro-1999.html"];
+		const catalogue = await freshModule("js/core/catalogue.js");
+		const index = await catalogue.getCatalogue();
+		// The router's own vocabulary: `#/` is home, every registered mode owns
+		// `#/<id>`, and every exhibit owns the route written in its markup.
+		const { modes } = await freshModule("js/core/modes.js");
+		const knownRoutes = new Set([
+			"#/",
+			...Object.keys(modes).map((id) => `#/${id}`),
+			...index.map((entry) => `#${entry.route}`),
+		]);
+
+		for (const file of files) {
+			const html = await fetchText(file);
+			for (const [, fragment] of html.matchAll(/href="#([^"]*)"/g)) {
+				if (fragment.startsWith("/")) {
+					const href = `#${fragment}`;
+					assert.ok(knownRoutes.has(href), `${file} links to ${href}, which no mode or exhibit registers`);
+					continue;
+				}
+				assert.ok(html.includes(`id="${fragment}"`), `${file} links to #${fragment}, which no element in that file is named`);
+			}
+		}
+	});
+
+	test("the exhibit index links are routes, so reading a wing survives using them", async () => {
+		const education = await fetchText("education.html");
+		const index = await (await freshModule("js/core/catalogue.js")).getCatalogue();
+		const exhibits = index.filter((entry) => entry.wingId === "education");
+		const links = [...education.matchAll(/class="index__link" href="([^"]+)"/g)].map((match) => match[1]);
+
+		assert.eq(links.length, exhibits.length, "the exhibit index and the catalogue disagree about how many exhibits there are");
+		for (const entry of exhibits) {
+			assert.includes(links.join(","), `#${entry.route}`, `${entry.accession} is missing from the index`);
 		}
 	});
 });

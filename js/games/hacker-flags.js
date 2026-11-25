@@ -69,14 +69,27 @@ export function reverse(text) {
 
 /* ---------- flag 01: the fragments, hidden in four devtools surfaces ---------- */
 
+/* FLAG-01 has no cipher: its answer *is* these four strings, so an array that
+   spelled them out would be the credential sitting in the one file the brief
+   tells the player to open. They are stored encoded for exactly the reason the
+   five ciphertexts below are. Keep one fragment literal on the surface that is the
+   puzzle — games.html, css/games.css, the console banner — and never the set here;
+   tests/cases/ciphers.js pins which file may show which fragment. */
 export const FRAGMENTS = [
-	{ id: "source", text: "0P3N", where: "a comment in the HTML source" },
-	{ id: "dom", text: "M4N", where: "the data-hk-dom-clue attribute on the terminal panel" },
-	{ id: "console", text: "_3D", where: "the banner logged to the console when this exhibit loads" },
-	{ id: "css", text: "51GN", where: "the --hk-fragment custom property in css/games.css" },
+	{ id: "source", enc: "MFAzTg==", where: "a comment in the HTML source" },
+	{ id: "dom", enc: "TTRO", where: "the data-hk-dom-clue attribute on the terminal panel" },
+	{ id: "console", enc: "XzNE", where: "the banner logged to the console when this exhibit loads" },
+	{ id: "css", enc: "NTFHTg==", where: "the --hk-fragment custom property in css/games.css" },
 ];
 
-export const CREDENTIAL = FRAGMENTS.map((fragment) => fragment.text).join("-");
+/** The fragment a surface is hiding, or null when `enc` is not readable. Encoded,
+ *  because a payload is not an answer. */
+export function decodeFragment(fragment) {
+	return fromB64(fragment.enc);
+}
+
+/** FLAG-01's answer, assembled at run time rather than written down. */
+export const CREDENTIAL = FRAGMENTS.map((fragment) => decodeFragment(fragment)).join("-");
 
 /* ---------- the flags ---------- */
 
@@ -88,7 +101,9 @@ const HEX_BYTES = "666c61677b62797465735f6e657665725f6c69657d";
 const MIRRORED_NOTE = "}fqenjxpno_gv_qnre{tnys";
 const DEEP_WRAP = "63336c756448746e64575679636c3935626d78795a575a6663584a795933303d";
 
-/** The shift FLAG-03 needs. Mirrored by data-hk-shift in games.html — the trail. */
+/** The shift FLAG-03 needs. Written onto the live panel as `data-hk-shift` by
+ *  js/games/hacker.js — the trail. games.html deliberately does not carry it: a
+ *  key that survived "View source" would solve the flag. */
 export const SHIFT = 7;
 
 /**
