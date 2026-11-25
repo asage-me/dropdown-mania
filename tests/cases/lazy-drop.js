@@ -11,8 +11,11 @@
  */
 
 import {
-	assert, choose, fetchText, host, mountExhibit, readStore, release, suite, test, text, tick,
+	assert, choose, clearStorage, fetchText, host, mountExhibit, readStore, release, scrollbarPress, suite, test, text, tick,
 } from "../harness.js";
+
+/** What the ledger currently shows, newest entry first. */
+const ledger = (root) => [...root.querySelectorAll("[data-ld-log] li")].map((li) => li.textContent);
 
 async function lazy() {
 	const exhibit = await mountExhibit("lazy-drop");
@@ -63,6 +66,38 @@ suite("games/lazy-drop.js", () => {
 		} finally { g.destroy(); }
 	});
 
+	/**
+	 * The discard above is right, and it used to be silent: someone who played
+	 * before an update arrives with a save sitting in their browser and a board
+	 * starting at tier one, which is indistinguishable from having lost it. A
+	 * ledger line costs one entry and says where the points went.
+	 */
+	test("a save that had to be dropped says so in the ledger", async () => {
+		writeSave({ version: 1, points: 987654, tiers: 9 });
+		const older = await lazy();
+		try {
+			const lines = ledger(older.root);
+			assert.ok(lines.some((line) => line.includes("version 1")),
+				`nothing names the discarded save: ${JSON.stringify(lines)}`);
+		} finally { older.destroy(); }
+
+		clearStorage();
+		writeSave({ points: 987654, tiers: 9 });
+		const unreadable = await lazy();
+		try {
+			const lines = ledger(unreadable.root);
+			assert.ok(lines.some((line) => /cannot read/.test(line)),
+				`a save with no version at all went unmentioned: ${JSON.stringify(lines)}`);
+		} finally { unreadable.destroy(); }
+	});
+
+	test("a first visit is not told about a save it never had", async () => {
+		const g = await lazy();
+		try {
+			assert.eq(ledger(g.root).length, 0, `a brand new visitor was shown ${JSON.stringify(ledger(g.root))}`);
+		} finally { g.destroy(); }
+	});
+
 	test("a save at the current version comes back", async () => {
 		const probe = await mountExhibit("lazy-drop");
 		// unmount() flushes, and only unmount() does — mounting alone writes
@@ -93,17 +128,26 @@ suite("games/lazy-drop.js", () => {
 				</dl>
 			</div>
 			<p class="bank"><span class="bank__label">Banked</span><b class="bank__value" data-ld-score>0</b></p>`);
+		// The band's own box, read after the layout has settled. Nothing in here
+		// may depend on where in the document the band happens to sit: the suite
+		// mounts and releases exhibits around this host, so a document-relative
+		// bottom compared across a reflow lands a pixel either way and failed one
+		// run in six. Height is the quantity that cannot move.
+		const band = () => {
+			node.getBoundingClientRect();
+			return node.querySelector(".bank").getBoundingClientRect();
+		};
 		try {
 			const cells = [...node.querySelectorAll(".statline dd")];
 			const before = cells.map((cell) => cell.getBoundingClientRect().left);
-			const boardTop = node.querySelector(".bank").getBoundingClientRect().bottom;
+			const bandHeight = band().height;
 
 			node.querySelector("[data-ld-score]").textContent = "9,876,543,210";
 			await tick(20);
 
 			const after = cells.map((cell) => cell.getBoundingClientRect().left);
 			assert.deepEq(after, before, "the statline moved when the score grew");
-			assert.ok(node.querySelector(".bank").getBoundingClientRect().bottom >= boardTop);
+			assert.eq(band().height, bandHeight, "the nine-figure score wrapped the band onto a second line");
 			assert.eq(getComputedStyle(node.querySelector(".bank__value")).whiteSpace, "nowrap", "a wrapping score would jitter the band");
 		} finally { release(node); }
 	});
@@ -218,5 +262,71 @@ suite("games/lazy-drop.js", () => {
 		assert.notMatch(source, /data-(winner|prize|winning)/, "the prize is stored on a data attribute");
 		assert.notMatch(source, /option\.(dataset|setAttribute)[^\n]*(win|prize)/i, "an option is tagged as the winner");
 		assert.match(source, /LONG_MENU_TIER/, "the Long Menu disappeared");
+	});
+
+	test("the Long Menu opens over five hundred rows and scrolls inside its own box", async () => {
+		// Everything above Tier 1 has to be bought, so a case reaches it the way a
+		// returning visitor does: a save in storage, which the game reads when
+		// `mountExhibit` imports it. This is the list `js/ui/scrollbar.js` exists for
+		// — five hundred rows inside a capped panel — and until now nothing had ever
+		// opened it: an uncapped panel would have no scrollbar, and the guard that
+		// keeps the thumb draggable would have nothing to guard.
+		writeSave({ version: 2, tiers: 7 });
+		const g = await lazy();
+		try {
+			const select = g.q("#ld-tier-7");
+			assert.ok(select, "Tier 7 did not come back from a save that has it");
+			assert.eq(select.options.length, 501, "The Long Menu is not 500 rows plus its placeholder");
+
+			// The plain module, not a fresh copy: the game built this widget through
+			// the copy it imported, and the registry that answers `selectTrigger`
+			// belongs to that one.
+			const { selectTrigger } = await import("../../js/ui/select.js");
+			const trigger = selectTrigger(select);
+			const panel = document.getElementById(trigger.getAttribute("aria-controls"));
+			// A real click focuses the trigger, and the focus has to be somewhere for
+			// the browser to take it away below.
+			trigger.focus();
+			trigger.click();
+			await tick(30);
+			assert.ok(trigger.getAttribute("aria-expanded") === "true", "the Long Menu would not open");
+			assert.ok(panel.scrollHeight > panel.clientHeight,
+				`five hundred rows fit in ${panel.clientHeight}px, so there is no scrollbar to drag`);
+			assert.ok(panel.clientHeight < panel.scrollHeight / 4,
+				"the panel is barely shorter than its list, which is not the box the 290px cap promises");
+
+			panel.scrollTop = panel.scrollHeight;
+			await tick(20);
+			assert.ok(panel.scrollTop > 0, "the Long Menu's panel refuses to scroll");
+			const rows = panel.querySelectorAll("[role=\"option\"]");
+			const last = rows[rows.length - 1];
+			assert.ok(rows.length >= 500, `only ${rows.length} rows reached the listbox`);
+			assert.ok(last.getBoundingClientRect().top < panel.getBoundingClientRect().bottom,
+				"the bottom of the list never came into view");
+
+			// Five hundred rows is also the only place on the site a thumb is worth
+			// reaching for, which makes this the exhibit the bug was reported on. The
+			// first fix let the press through and the menu still shut, because the
+			// browser moves focus out from under an open listbox on its own and that
+			// is the exit ArchiveSelect dismisses on (js/ui/presses.js). On the real
+			// wing that focus lands on `main.wing[tabindex="-1"]`; this host carries
+			// no wing, and the difference is not cosmetic — a focus change that lands
+			// on nothing at all reports no `relatedTarget`, and ArchiveSelect lets
+			// that one alone on purpose (click-outside is what closes the menu for a
+			// click on inert page in the browser, not focus loss). So the host is
+			// given the same kind of element the real page has: focusable, outside
+			// the widget's root, with no class whose CSS could move anything.
+			const wing = document.createElement("main");
+			wing.tabIndex = -1;
+			g.root.after(wing);
+			try {
+				const survived = scrollbarPress(panel, { trigger, focusTarget: wing });
+				await tick(30);
+				assert.ok(survived, "a press on the Long Menu's bar was cancelled, so its thumb cannot be dragged");
+				assert.notOk(panel.hidden, "reaching for the bar closed the five-hundred-row menu on top of it");
+				assert.eq(trigger.getAttribute("aria-expanded"), "true", "aria-expanded claims the Long Menu is still open");
+				assert.eq(document.activeElement, trigger, "the menu stayed open but its focus went out to the page");
+			} finally { release(wing); }
+		} finally { g.destroy(); }
 	});
 });

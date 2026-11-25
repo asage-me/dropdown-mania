@@ -10,6 +10,8 @@
 
 import { createMenu, Menu } from "../ui/menu.js";
 import { selectTrigger } from "../ui/select.js";
+import { isScrollbarPress } from "../ui/scrollbar.js";
+import { trackPanelPresses } from "../ui/presses.js";
 
 export default {
 	id: "education",
@@ -240,11 +242,24 @@ export default {
 				}
 			};
 
+			/**
+			 * The one way out of the list. Hiding it is not enough on its own:
+			 * aria-activedescendant is a pointer into a list that is on screen, and a
+			 * collapsed list still pointing at an option leaves a screen reader reading
+			 * a row the visitor cannot see, with the next arrow key starting from a row
+			 * that is not there. Three call sites (Escape, a commit, focus walking off)
+			 * each used to remember the first two of these three.
+			 */
+			const collapse = () => {
+				list.hidden = true;
+				input.setAttribute("aria-expanded", "false");
+				input.removeAttribute("aria-activedescendant");
+			};
+
 			const commit = (index) => {
 				if (!matches[index]) return;
 				input.value = matches[index];
-				list.hidden = true;
-				input.setAttribute("aria-expanded", "false");
+				collapse();
 				count.textContent = `Selected: ${matches[index]}.`;
 			};
 
@@ -258,23 +273,44 @@ export default {
 					case "Enter":
 						if (!list.hidden && matches[activeIndex]) { event.preventDefault(); commit(activeIndex); }
 						break;
-					case "Escape": event.preventDefault(); list.hidden = true; input.setAttribute("aria-expanded", "false"); break;
+					case "Escape": event.preventDefault(); collapse(); break;
 					default: break;
 				}
 			};
 			const onBlur = () => {
+				// Asked now, not inside the timer below: the press is over by the time
+				// the grace period ends, and this blur is the browser moving focus off
+				// a control whose list is open, not the reader walking away
+				// (js/ui/presses.js). Put the caret straight back and leave the list up.
+				if (presses.pressing()) { input.focus({ preventScroll: true }); return; }
 				window.setTimeout(() => {
-					if (!combo.contains(document.activeElement)) {
-						list.hidden = true;
-						input.setAttribute("aria-expanded", "false");
-					}
+					if (!combo.contains(document.activeElement)) collapse();
 				}, 120);
+			};
+
+			// Nothing in this list takes focus — the highlight lives in
+			// aria-activedescendant — so a press on a row, left alone, moves focus to
+			// main.wing[tabindex="-1"] and the reader loses the caret mid-word. The
+			// two real components refuse the press for the same reason (js/ui/menu.js,
+			// js/ui/select.js), and both put isScrollbarPress in front of the refusal
+			// because this list scrolls (overflow-y); a drag of its bar must stay a
+			// drag. Same here, for the same reason — and the same follow-through: the
+			// press that is spared still moves focus, so the blur below asks the
+			// tracker in js/ui/presses.js whether the pointer is on the list before it
+			// treats that move as the reader leaving.
+			const presses = trackPanelPresses(list);
+			use(() => presses.release());
+
+			const onListMouseDown = (event) => {
+				if (isScrollbarPress(event, list)) return;
+				event.preventDefault();
 			};
 
 			on(input, "input", onInput);
 			on(input, "focus", onFocus);
 			on(input, "keydown", onKey);
 			on(input, "blur", onBlur);
+			on(list, "mousedown", onListMouseDown);
 			count.textContent = `${RECORDS.length} records. Start typing to filter.`;
 		}
 
@@ -298,7 +334,7 @@ export default {
 			};
 			on(root.querySelector("#dd008-select"), "keydown", onKey, true);
 			// The widget's trigger, not the hidden native element, receives keys.
-				const trigger = selectTrigger(root.querySelector("#dd008-select"));
+			const trigger = selectTrigger(root.querySelector("#dd008-select"));
 			on(trigger, "keydown", onKey, true);
 		}
 

@@ -14,7 +14,23 @@
  *   Enter / Space              commit the active option
  *   Esc                        close, discard the highlight
  *   Tab                        close, commit nothing
+ *
+ * Dismissal: Esc, Tab, a pick, or anything outside the widget — focus moving
+ * elsewhere, or a click that takes no focus at all. Both outside cases are
+ * document-level listeners because the widget cannot observe an input it does
+ * not own; closing on outside input never pulls focus back to the trigger.
+ *
+ * Focus stays on the trigger for the whole visit to the list. Nothing in the
+ * listbox is focusable, so a mousedown inside it is cancelled: left to itself it
+ * would move focus to the nearest focusable ancestor on the page, which is an
+ * exit as far as the listeners above are concerned, and the pick would never
+ * land. One press is spared — see ui/scrollbar.js — and because sparing it does
+ * not stop that press from moving focus, ui/presses.js is what keeps the spared
+ * press from being read as an exit.
  */
+
+import { isScrollbarPress } from "./scrollbar.js";
+import { trackPanelPresses } from "./presses.js";
 
 const registry = new WeakMap();
 const openSet = new Set();
@@ -209,14 +225,56 @@ class ArchiveSelect {
 			if (this.fromComponent) return;
 			this.paint();
 		};
-		this.onDocumentFocusOut = (event) => {
-			if (this.open && !this.root.contains(event.target)) this.close();
+		this.onListboxMouseDown = (event) => {
+			// Nothing inside the listbox takes focus — the highlight is a value in
+			// aria-activedescendant, not a focused element — so letting mousedown do
+			// its default hands focus to the nearest focusable ancestor instead, which
+			// on every page of this archive is <main class="wing" tabindex="-1">. The
+			// dismissal below reads that as the visitor leaving the widget and hides
+			// the menu before mouseup, so the click lands on the exhibit around it
+			// rather than on the option: the menu closes and nothing is ever chosen.
+			// Refusing the focus move keeps it on the trigger, which is where the
+			// combobox pattern wants it to stay regardless. The panel's own
+			// scrollbar is the one press that keeps its default, so a long menu
+			// (The Long Menu is 500 rows) can still be dragged — ui/scrollbar.js.
+			if (isScrollbarPress(event, this.listbox)) return;
+			event.preventDefault();
 		};
+		this.onDocumentFocusOut = (event) => {
+			// relatedTarget is the element gaining focus; target is the one losing
+			// it, which for this widget's own trigger is always inside the root.
+			// Testing target was the bug: the menu only ever closed when focus moved
+			// within the page in a way that had nothing to do with it.
+			// refocus: false because focus is deliberately going elsewhere.
+			const next = event.relatedTarget;
+			if (!this.open || !next || this.root.contains(next)) return;
+			// Unless the pointer is on the widget. The one press this widget does not
+			// cancel — its own scrollbar — still moves focus out, because Chromium
+			// drops focus from a control whose listbox is open for any press inside
+			// it; the visitor is mid-drag. Put focus where the pattern wants it and
+			// leave the list up, or closing the menu on top of the thumb is what a
+			// scroll attempt buys (ui/presses.js).
+			if (this.presses.pressing()) {
+				this.trigger.focus({ preventScroll: true });
+				return;
+			}
+			this.close({ refocus: false });
+		};
+		this.onDocumentClick = (event) => {
+			// Plenty of click targets take no focus at all — text, a card, a wrapper
+			// — so focusout never fires for them and the menu would sit open over the
+			// rest of the page. DD-004's own escape hatch promises click-outside.
+			if (this.open && !this.root.contains(event.target)) this.close({ refocus: false });
+		};
+
+		this.presses = trackPanelPresses(this.listbox);
 
 		this.trigger.addEventListener("keydown", this.onTriggerKey);
 		this.trigger.addEventListener("click", this.onTriggerClick);
+		this.listbox.addEventListener("mousedown", this.onListboxMouseDown);
 		this.native.addEventListener("change", this.onNativeChange);
 		document.addEventListener("focusout", this.onDocumentFocusOut);
+		document.addEventListener("click", this.onDocumentClick);
 	}
 
 	/* ---------- state ---------- */
@@ -394,8 +452,11 @@ class ArchiveSelect {
 		this.close({ refocus: false });
 		this.trigger.removeEventListener("keydown", this.onTriggerKey);
 		this.trigger.removeEventListener("click", this.onTriggerClick);
+		this.listbox.removeEventListener("mousedown", this.onListboxMouseDown);
+		this.presses.release();
 		this.native.removeEventListener("change", this.onNativeChange);
 		document.removeEventListener("focusout", this.onDocumentFocusOut);
+		document.removeEventListener("click", this.onDocumentClick);
 		this.root.remove();
 		this.native.style.removeProperty("display");
 		this.native.removeAttribute("aria-hidden");

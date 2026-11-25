@@ -4,8 +4,17 @@
  * ArchiveSelect handles native <select>. This handles the hand-authored
  * dropdowns the archive teaches about: the hero drawer, the mega menu, the
  * multi-select, the searchable filter. Same keyboard contract as the select,
- * so every dropdown on the site behaves identically.
+ * so every dropdown on the site behaves identically — and the same model for
+ * getting out of one: Esc, Tab, a pick, a click anywhere outside, or focus
+ * moving somewhere else entirely, none of which drags focus back except on a
+ * pick. The list's own items are not focusable, so a mousedown inside the panel
+ * is cancelled to keep focus on the trigger; see ui/scrollbar.js for the one
+ * press that is spared, and ui/presses.js for why the spared press still has to
+ * be caught before it reads as leaving.
  */
+
+import { isScrollbarPress } from "./scrollbar.js";
+import { trackPanelPresses } from "./presses.js";
 
 const PRINTABLE = /^[a-z0-9!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-]$/i;
 const openMenus = new Set();
@@ -137,14 +146,49 @@ export function createMenu({ trigger, panel, itemSelector = "[data-menu-item]", 
 		commit(items().indexOf(target));
 	}
 
+	// Nothing in the list takes focus — the highlight lives in
+	// aria-activedescendant — so a mousedown left alone hands focus to the
+	// nearest focusable ancestor, which on every page here is
+	// <main class="wing" tabindex="-1">. The dismissal below reads exactly that
+	// as leaving the widget, so without this the list closed under the pointer
+	// before mouseup, the click landed on the page around it, and a pick did
+	// nothing at all. Cancelling mousedown is also what stops a scrollbar thumb
+	// being dragged, which is why the panel's own bar is left alone.
+	function onPanelMouseDown(event) {
+		if (isScrollbarPress(event, panel)) return;
+		event.preventDefault();
+	}
+
 	function onDocClick(event) {
 		if (state.open && !trigger.parentElement.contains(event.target)) close();
 	}
 
+	// Focus moving out is an exit too: the index palette, a filter dialog, or
+	// simply Tab. relatedTarget is the element gaining focus, and focus stays
+	// with it — close() on this path never pulls focus back to the trigger.
+	function onFocusOut(event) {
+		const next = event.relatedTarget;
+		if (!state.open || !next || trigger.parentElement.contains(next)) return;
+		// Except for a press the panel is holding. The press on the panel's own
+		// scrollbar is deliberately not cancelled, and Chromium still moves focus
+		// off a control whose list is open for it — mid-drag, that is not a
+		// departure, so the focus goes back where the listbox pattern wants it and
+		// the menu stays up over the thumb (ui/presses.js).
+		if (presses.pressing()) {
+			trigger.focus({ preventScroll: true });
+			return;
+		}
+		close();
+	}
+
+	const presses = trackPanelPresses(panel);
+
 	trigger.addEventListener("click", onTriggerClick);
 	trigger.addEventListener("keydown", onKey);
 	panel.addEventListener("click", onPanelClick);
+	panel.addEventListener("mousedown", onPanelMouseDown);
 	document.addEventListener("click", onDocClick);
+	document.addEventListener("focusout", onFocusOut);
 
 	// Give every option an id so aria-activedescendant has something to point at.
 	items().forEach((el, i) => {
@@ -176,7 +220,10 @@ export function createMenu({ trigger, panel, itemSelector = "[data-menu-item]", 
 			trigger.removeEventListener("click", onTriggerClick);
 			trigger.removeEventListener("keydown", onKey);
 			panel.removeEventListener("click", onPanelClick);
+			panel.removeEventListener("mousedown", onPanelMouseDown);
+			presses.release();
 			document.removeEventListener("click", onDocClick);
+			document.removeEventListener("focusout", onFocusOut);
 			openMenus.delete(state);
 		},
 	};

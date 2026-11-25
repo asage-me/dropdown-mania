@@ -1,10 +1,11 @@
 /**
  * A test runner with no build step, because the site has no build step.
  *
- * There is no package.json here and adding one would be the beginning of a
- * toolchain nobody asked for, so this is a page: open /tests/ over the same
- * static server the site uses and it runs. `?json` prints the report as JSON
- * for a machine reader.
+ * There is no toolchain here and adding one would be the beginning of a build nobody asked
+ * for, so this is a page: open /tests/ over the same static server the site uses and it
+ * runs. `?json` prints the report as JSON for a machine reader. The `tests/package.json`
+ * beside this file is not a project file: it holds one key, present only so Node reads
+ * `tests/*.js` as ES modules.
  *
  * Three things it exists to make possible:
  *
@@ -192,16 +193,38 @@ export function release(node) {
 }
 
 /**
+ * The games keep their run state in module scope, so importing the module is
+ * what decides whether a mount starts from nothing. Exported for the one test
+ * that needs the opposite: a game mounted twice from the same module instance,
+ * which is what leaving the wing and coming back really is.
+ */
+export function gameModule(gameId) {
+	const paths = {
+		"find-path": "js/games/find-path.js",
+		hacker: "js/games/hacker.js",
+		"lazy-drop": "js/games/lazy-drop.js",
+	};
+	const path = paths[gameId];
+	if (!path) throw new Error(`no game module named ${show(gameId)}`);
+	return freshModule(path);
+}
+
+/**
  * Mount one exhibit into the real games.html. Returns the game's handle plus a
  * stub api that records which achievements it asked for.
+ *
+ * Pass `sameModule` (a namespace from gameModule) to mount a second instance of
+ * a game that is already imported. Without it every call gets a fresh module and
+ * therefore fresh run state, which is right for most tests and wrong for
+ * testing what survives a wing re-entry.
  */
-export async function mountExhibit(gameId) {
+export async function mountExhibit(gameId, sameModule) {
 	const { loadTemplate } = await freshModule("js/core/templates.js");
 	// Not freshModule: the widget keeps its registry in module scope, and the
 	// games import the plain path. A second copy of the module would build
 	// widgets the game's own refreshSelect() cannot see.
 	const { destroySelectsIn, enhanceSelects } = await import("../js/ui/select.js");
-	const game = { "find-path": () => freshModule("js/games/find-path.js"), hacker: () => freshModule("js/games/hacker.js"), "lazy-drop": () => freshModule("js/games/lazy-drop.js") }[gameId]();
+	const game = sameModule ? Promise.resolve(sameModule) : gameModule(gameId);
 
 	const container = host(await loadTemplate("../games.html"));
 	const section = container.querySelector(`[data-game="${gameId}"]`);
@@ -253,6 +276,163 @@ export function choose(select, value) {
 	}
 	select.value = value;
 	select.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+/**
+ * Whether an element can hold focus. A `tabindex` of any value counts, including
+ * `-1`, which is focusable on a click and merely untabbable.
+ */
+const FOCUSABLE = "a[href],button,input,select,textarea,summary,[contenteditable],[tabindex]";
+function isFocusable(el) {
+	return Boolean(el) && el !== document.documentElement && el.matches(FOCUSABLE);
+}
+
+/**
+ * The focusable ancestor a browser would land on when a press falls on something
+ * it cannot focus — `main.wing[tabindex="-1"]` on every page of this site.
+ */
+function focusableAncestor(node) {
+	for (let el = node; el; el = el.parentElement) if (isFocusable(el)) return el;
+	return null;
+}
+
+/**
+ * Move focus for real and let the browser raise its own `blur`/`focusout`. Hand
+ * made `FocusEvent`s are not the same thing: a widget cannot tell them apart, but
+ * a test cannot tell a missing handler from a missed one either, and a whole class
+ * of dismissal bug walked past the synthetic version unnoticed.
+ *
+ * The decision is made from what *can* take focus, never from where focus ended up
+ * afterwards: a widget that answers the focus move by pulling focus back
+ * synchronously — which is the fix under test — would otherwise look like a press
+ * that moved nothing, and the helper would blur the focus it just won back. A
+ * target that cannot hold focus is the page-at-large case, and a browser spells
+ * that a blur onto `<body>`.
+ */
+function moveFocusTo(target) {
+	const before = document.activeElement;
+	if (isFocusable(target) && target !== before) {
+		target.focus({ preventScroll: true });
+		return;
+	}
+	if (before && before !== document.body) before.blur();
+}
+
+/** A real click on a trigger leaves focus on it, which is what a press can take. */
+function focusTrigger(trigger, item) {
+	if (trigger !== item && document.activeElement !== trigger) trigger.focus({ preventScroll: true });
+}
+
+/**
+ * Pick an item in an open list the way a mouse does: mousedown, then the focus
+ * move its default causes, then mouseup and click on whatever the pointer is
+ * over by then.
+ *
+ * This exists because `item.click()` cannot fail in the one way a dropdown fails.
+ * Nothing inside these lists is focusable — that is the point of keeping the
+ * highlight in `aria-activedescendant` — so a mousedown left alone hands focus to
+ * the nearest focusable ancestor (`main.wing[tabindex="-1"]` on every page), a
+ * widget that dismisses on focus loss hides its own list before `mouseup`, and
+ * Chromium, which reads a click as the place the pointer went down *and* the
+ * place it came up, gives the click to an ancestor of the option. The menu
+ * closes, nothing is chosen, and a bare `.click()` still passes. A bare
+ * `.click()` proves a handler is bound; only a sequence like this one says
+ * whether the click would have reached it.
+ *
+ * The focus move is a real one, so the blur the widget has to survive is the
+ * browser's own — and it happens only when the press stood, because a cancelled
+ * `mousedown` never reaches the browser's focus handling at all. `focusTarget` is
+ * where focus goes; left out, the helper infers the nearest focusable ancestor the
+ * way a browser does. `panel` is the open list, `trigger` the control whose click
+ * opened it (focused first, as a real click would). Returns the clicked element.
+ */
+export function mousePick(item, { panel, trigger = item, focusTarget = null } = {}) {
+	focusTrigger(trigger, item);
+	const press = new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window });
+	item.dispatchEvent(press);
+	if (press.defaultPrevented) {
+		// The widget refused the focus move, so the pointer is still on the item.
+		item.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
+		item.click();
+		return item;
+	}
+	moveFocusTo(focusTarget || focusableAncestor(item.parentElement) || document.body);
+	const target = panel && panel.hidden ? panel.parentElement : item;
+	target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
+	target.click();
+	return target;
+}
+
+/**
+ * A mousedown at a point in the page, asked as a yes/no question: did something
+ * cancel it? Both dropdowns cancel mousedown across their own list — see
+ * `mousePick` — so a test needs to say which presses must survive that.
+ */
+export function pressAt(target, x, y) {
+	const event = new MouseEvent("mousedown", { bubbles: true, cancelable: true, clientX: x, clientY: y });
+	target.dispatchEvent(event);
+	return event.defaultPrevented;
+}
+
+/**
+ * One pixel past the client box of a scrolling panel, which is where Chromium
+ * reports a press on that panel's own vertical bar. `offsetX` is measured from the
+ * target's padding box, so a press on the bar arrives with coordinates past
+ * `clientWidth` — exactly the arithmetic `js/ui/scrollbar.js` reads.
+ */
+export function pastPanelEdge(panel) {
+	const box = panel.getBoundingClientRect();
+	const border = parseFloat(getComputedStyle(panel).borderLeftWidth) || 0;
+	return box.left + border + panel.clientWidth + 1;
+}
+
+/**
+ * A press on a scrolling panel's own scroll bar, replayed in the order Chromium
+ * produces it, for widgets that must survive it.
+ *
+ * `mousePick` covers the press a widget refuses. This is the one it must not: the
+ * bar, where cancelling `mousedown` stops the thumb. The event order comes from a
+ * capture-phase log of a real press on a real five-hundred-row menu — `pointerdown`
+ * and `mousedown` on the panel with coordinates past its client box, then
+ * `focusout`/`focusin` as the browser moves focus from the control to
+ * `<main class="wing" tabindex="-1">` of its own accord, then the release coming
+ * back on the panel.
+ *
+ * The focus move is the test. A press replayed without it only proves the widget
+ * spared the bar, which the broken version also did; what it closed was the list,
+ * one event later, on a `focusout` indistinguishable from a keyboard Tab out.
+ * The move is a real one, so the blur events are the browser's own rather than
+ * hand-made ones, and `trigger` is focused first because a real click on it left
+ * focus there — with nothing holding focus there is no focus to lose and nothing to
+ * test. `focusTarget` is where it goes; left out it is inferred from the nearest
+ * focusable ancestor exactly as `mousePick` does. Do not leave it out on a fragment
+ * with no focusable ancestor: the move is then a blur onto `<body>`, whose
+ * `focusout` carries a null `relatedTarget`, which both widgets let go on purpose —
+ * the press would look survived while testing nothing.
+ *
+ * One liberty: a browser sends **no** `click` for a press on the trough, and this
+ * replay sends one anyway, so the case also proves the panel survives a click
+ * landing on itself. That is harsher than reality, not faithful to it.
+ *
+ * Returns whether the press survived (true = the thumb can be dragged).
+ */
+export function scrollbarPress(panel, { trigger = document.activeElement, focusTarget = null } = {}) {
+	const x = pastPanelEdge(panel);
+	const y = Math.round(panel.getBoundingClientRect().top + panel.clientHeight / 2);
+	const at = { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y, button: 0 };
+	const pointer = { ...at, pointerId: 1, isPrimary: true };
+
+	focusTrigger(trigger, panel);
+	panel.dispatchEvent(new PointerEvent("pointerdown", { ...pointer, buttons: 1 }));
+	const down = new MouseEvent("mousedown", { ...at, buttons: 1 });
+	panel.dispatchEvent(down);
+	// A cancelled press never reaches the browser's focus handling at all, which
+	// is the very thing that makes a bar press worth sparing.
+	if (!down.defaultPrevented) moveFocusTo(focusTarget || focusableAncestor(panel) || document.body);
+	panel.dispatchEvent(new PointerEvent("pointerup", { ...pointer, buttons: 0 }));
+	panel.dispatchEvent(new MouseEvent("mouseup", { ...at, buttons: 0 }));
+	panel.dispatchEvent(new MouseEvent("click", at));
+	return !down.defaultPrevented;
 }
 
 export function submit(form) {

@@ -99,9 +99,20 @@ function freshState() {
 	return { ...DEFAULTS, log: [] };
 }
 
+// A save this build cannot read is dropped rather than half-read, which is right,
+// but on its own it is also invisible: the visitor has a save in their browser and a
+// board starting at tier one, which is exactly what a lost score looks like. Kept
+// here because `restore()` runs before anything can render, and consumed by the first
+// mount so a wing re-entry does not repeat the line.
+let unreadableSave = null;
+
 function restore() {
 	const stored = load(STORE_KEY);
-	if (!stored || stored.version !== SAVE_VERSION) return freshState();
+	if (!stored) return freshState();
+	if (stored.version !== SAVE_VERSION) {
+		unreadableSave = stored.version === undefined ? "no version recorded" : `version ${stored.version}`;
+		return freshState();
+	}
 	return { ...freshState(), ...stored };
 }
 
@@ -149,6 +160,11 @@ export default {
 			state.log = [message, ...(Array.isArray(state.log) ? state.log : [])].slice(0, 5);
 			renderLog();
 			scheduleSave();
+		}
+
+		if (unreadableSave) {
+			log(`Replaced a save this build cannot read: ${unreadableSave}.`);
+			unreadableSave = null;
 		}
 
 		/* ---------- tiers ---------- */
@@ -375,7 +391,8 @@ export default {
 			log("Save wiped. Tier 1, nothing banked.");
 		}
 
-		root.querySelector("[data-ld-reset]").addEventListener("click", reset);
+		const resetBtn = root.querySelector("[data-ld-reset]");
+		resetBtn.addEventListener("click", reset);
 		document.addEventListener("visibilitychange", flush, { passive: true });
 
 		function flush() {
@@ -395,6 +412,7 @@ export default {
 				window.clearInterval(autoTimer);
 				window.clearTimeout(saveTimer);
 				autoTimer = 0;
+				resetBtn.removeEventListener("click", reset);
 				document.removeEventListener("visibilitychange", flush);
 			},
 			onShow() {
