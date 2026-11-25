@@ -116,7 +116,12 @@ const state = {
  * reassigned, because every closure in `mount` holds this object.
  *
  * Nothing on the site calls it: no UI path is a reset, and the cleared record in
- * storage is a different thing entirely, so it stays where it is.
+ * storage is a different thing entirely, so it stays where it is. Its one consumer is
+ * `tests/cases/hacker.js`, which reaches this module through the computed `import()` in
+ * `tests/harness.js`, so there is no static edge for a dependency graph to find — hence
+ * the tag below, which Fallow reports as stale the day a real import shows up.
+ *
+ * @expected-unused
  */
 export function resetRunState() {
 	Object.assign(state, {
