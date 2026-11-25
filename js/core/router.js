@@ -9,6 +9,9 @@
  *   #/games[/find-path|hacker|lazy-drop]   wing II (+ exhibit)
  *   #/retro                wing III
  *
+ * A hash that does not start with `#/` is an in-page anchor, not a route, and is
+ * left to the browser (see isRoute).
+ *
  * Each mount may return a cleanup function; the router guarantees exactly one
  * mount is live at a time, which is what kills the duplicate-listener class of
  * bugs the original had (init() ran on every tab click and re-bound handlers).
@@ -28,6 +31,25 @@ export function createRouter({ outlet, modes, onRendered, api }) {
 		const [mode, sub] = raw.split("/").filter(Boolean);
 		const id = mode && modes[mode] ? mode : "home";
 		return { id, sub: sub || null, path: `/${[id, sub].filter(Boolean).join("/")}` };
+	}
+
+	/**
+	 * Only `#/…` addresses a wing. A bare fragment — the skip link's
+	 * `#main-content`, or an in-page `#section` — names an id inside whatever is
+	 * already mounted, and belongs to the browser's own scrolling. Reading one
+	 * as a route sent the visitor to home (the fragment matched no mode) and
+	 * rewrote the URL they were reading, so a reload landed in the wrong wing.
+	 */
+	function isRoute(hash) {
+		return !hash || hash === "#" || hash.startsWith("#/");
+	}
+
+	/**
+	 * The route actually on screen. `location.hash` can legitimately hold a bare
+	 * fragment (see isRoute), so it is not always the truth about what is mounted.
+	 */
+	function liveRoute() {
+		return currentRoute ?? parse(window.location.hash);
 	}
 
 	function teardown() {
@@ -95,6 +117,7 @@ export function createRouter({ outlet, modes, onRendered, api }) {
 	}
 
 	function handle() {
+		if (!isRoute(window.location.hash)) return;
 		const route = parse(window.location.hash);
 		if (route.path === currentPath) return;
 
@@ -119,6 +142,10 @@ export function createRouter({ outlet, modes, onRendered, api }) {
 			window.addEventListener("hashchange", handle);
 			handle();
 		},
+		/** The router owns exactly this one document listener, so it removes it. */
+		stop() {
+			window.removeEventListener("hashchange", handle);
+		},
 		navigate(path) {
 			const target = `#${path}`;
 			if (window.location.hash === target) {
@@ -128,10 +155,10 @@ export function createRouter({ outlet, modes, onRendered, api }) {
 			}
 		},
 		current() {
-			return parse(window.location.hash);
+			return liveRoute();
 		},
 		rerender() {
-			render(parse(window.location.hash), { scroll: false });
+			render(liveRoute(), { scroll: false });
 		},
 	};
 }
