@@ -8,12 +8,19 @@
  */
 
 import {
-	assert, choose, freshModule, mountExhibit, readStore, suite, test, text, tick,
+	assert, choose, freshModule, gameModule, mountExhibit, readStore, suite, test, text, tick,
 } from "../harness.js";
 
-async function path(setId = "markup") {
+/**
+ * Mount DD-012, optionally dealt a named set.
+ *
+ * Pass `setId: null` to leave the picker alone. Choosing a set runs newRun(),
+ * which clears the run — so a test that wants a mount to behave like a wing
+ * re-entry must not choose anything.
+ */
+async function path(setId = "markup", sameModule) {
 	const sets = await freshModule("js/games/path-sets.js");
-	const exhibit = await mountExhibit("find-path");
+	const exhibit = await mountExhibit("find-path", sameModule);
 	const q = (selector) => exhibit.root.querySelector(selector);
 	const game = {
 		...exhibit, q, sets,
@@ -29,8 +36,10 @@ async function path(setId = "markup") {
 			}
 		},
 	};
-	choose(game.setSelect, setId);
-	await tick(40);
+	if (setId !== null) {
+		choose(game.setSelect, setId);
+		await tick(40);
+	}
 	return game;
 }
 
@@ -158,6 +167,40 @@ suite("games/find-path.js — the board", () => {
 			assert.ok(saved && "standard" in saved, "the best time was not saved");
 			assert.includes(saved.completed, "markup");
 		} finally { g.destroy(); }
+	});
+
+	test("clearing a run, leaving the wing and coming back leaves a playable board", async () => {
+		// Two mounts of ONE module instance, because that is what a wing re-entry
+		// is: the module stays in the browser's module map while the router throws
+		// the wing's DOM away and fetches it again. The defect this pins was a
+		// rebuilt board under a `won` flag left over from the finished run, which
+		// hid nothing, announced nothing, and refused every answer.
+		const game = await gameModule("find-path");
+		const first = await path("markup", game);
+		let back = null;
+		try {
+			await first.solve();
+			assert.notOk(first.q("[data-fp-result]").hidden, "the win panel never appeared, so this proves nothing");
+			assert.notEq(text(first.root, "[data-fp-attempts]"), "0", "the run was never actually played");
+
+			first.destroy();
+			// No set chosen: this mount has to survive on its own, the way the
+			// router does it when the visitor walks back into Wing II.
+			back = await path(null, game);
+
+			assert.ok(back.q("[data-fp-result]").hidden, "a finished run's result panel came back over a new board");
+			assert.eq(text(back.root, "[data-fp-attempts]"), "0", "the previous run's attempt count came back");
+			assert.match(back.q("[data-fp-hint-count]").textContent, /2/, "a new visit started with last visit's hints");
+			assert.eq(back.rows().filter((row) => row.hidden).length, 4, "the returned board was not a fresh run");
+
+			const levels = back.sets.getSet("markup").levels;
+			await back.pick(0, levels[0].correct);
+			assert.notOk(back.rows()[1].hidden, "the returned board refused the correct answer");
+			assert.eq(text(back.root, "[data-fp-attempts]"), "1", "a correct answer on the returned board was not counted");
+		} finally {
+			first.destroy();
+			back?.destroy();
+		}
 	});
 
 	test("hints run out and say so instead of silently doing nothing", async () => {

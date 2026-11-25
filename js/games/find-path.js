@@ -88,6 +88,7 @@ export default {
 		const blurbEl = root.querySelector("[data-fp-set-blurb]");
 		const hintBtn = root.querySelector("[data-fp-hint]");
 		const hintCount = root.querySelector("[data-fp-hint-count]");
+		const resetBtn = root.querySelector("[data-fp-reset]");
 		const notes = document.createElement("p");
 		notes.className = "path__notes";
 		notes.dataset.fpNotes = "";
@@ -411,7 +412,7 @@ export default {
 		result.addEventListener("click", onNext);
 
 		const onReset = () => newRun(state.setPick);
-		root.querySelector("[data-fp-reset]").addEventListener("click", onReset);
+		resetBtn.addEventListener("click", onReset);
 		hintBtn.addEventListener("click", takeHint);
 
 		fillSetPicker(setSelect);
@@ -420,13 +421,15 @@ export default {
 		// native element is not enough on its own: the widget has to be told to
 		// read it again.
 		refreshSelect(setSelect);
-		loadSet(state.setPick);
+		// Mounting is a new run, not a resumption. `state` is module scope, so it
+		// outlives the wing; loadSet() below rebuilds the board from scratch
+		// whatever survived in it. Restoring the old attempt count and re-showing
+		// the win panel instead described a run that was no longer on the screen —
+		// and left `won` true, which rejected every answer on the new board.
+		newRun(state.setPick);
 		setMode(state.mode);
 		paintBest();
 		paintProgress();
-		attemptsEl.textContent = String(state.attempts);
-		clockEl.textContent = formatTime(state.elapsed);
-		if (state.won) result.hidden = false;
 
 		return {
 			unmount() {
@@ -437,6 +440,8 @@ export default {
 				});
 				setSelect.removeEventListener("change", onSetChange);
 				result.removeEventListener("click", onNext);
+				resetBtn.removeEventListener("click", onReset);
+				hintBtn.removeEventListener("click", takeHint);
 			},
 			onShow() {
 				paintBest();
