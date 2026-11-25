@@ -23,6 +23,13 @@ python -m http.server 8000     # then open http://localhost:8000/index.html
 Any static server works (`npx serve`, `php -S localhost:8000`, GitHub Pages). There is nothing to
 compile and nothing to install.
 
+One trap, because it wastes an afternoon: `http.server` answers with `Last-Modified` alone, and
+Chrome counts a module it fetched a minute ago as still fresh. An edit can therefore sit invisible
+behind an ordinary reload, tests and all — the page runs the code that is gone. Hard-reload
+(Ctrl+Shift+R) after changing any module, and for a headless run give the browser a throwaway
+profile (the flags are under [Tests](#tests)), because a profile that starts empty is the only cache
+that cannot lie to you.
+
 ---
 
 ## Tests
@@ -34,16 +41,50 @@ and adding a bundler to test eleven files would cost more than it saves.
 python -m http.server 8000     # then open http://localhost:8000/tests/
 ```
 
-Assertions over the storage layer, the dropdown widget, the record book, the cipher data, and all
-three games mounted into the real `games.html`. `?json` prints the report as JSON.
+Assertions over the storage layer, the router, both dropdown components and the scrollbar and press
+guards they share, the record book, the cipher data, all three games mounted into the real
+`games.html`, and the education wing's hand-wired combobox. `?json` prints the report as JSON.
+
+`.github/workflows/ci.yml` runs that same page headless: a browser loads `/tests/?json`, and the
+run fails if the report is empty or any case fails. It then loads every route the same way and
+fails on an uncaught error or a wing whose template could not be found. Nothing is installed to
+make that work, which is the point — a static server and a browser are the whole toolchain, so the
+same check is cheap enough to run before committing:
+
+```bash
+python -m http.server 8000
+chromium --headless --dump-dom --virtual-time-budget=120000 http://127.0.0.1:8000/tests/?json
+```
+
+Give that browser a profile of its own whenever an ordinary Chrome window is already open — add
+`--disk-cache-size=1 --user-data-dir="$TMPDIR/dropdown-archive-chrome"`. On the default profile
+Chrome hands the load to the open window and prints an empty document, or serves the wing modules
+out of its cache and reports the totals of the run *before* yours. A CI runner always starts clean,
+which is the only reason `ci.yml` needs neither flag, and its refusal of a zero-test report is what
+stops an empty dump from reading as a pass.
+
+There is no linter, formatter or type checker configured, because there is no toolchain to
+configure one inside. The single Node-facing file in the repo is `tests/package.json` — one key,
+`"type": "module"`, there so `tests/answer-key.js` can be the decoder table both guards import
+instead of one they each copy (see its header for why `.mjs` could not do that job).
+`.editorconfig` carries the indentation and line-ending rules that the files already follow, and
+the workflow enforces the two conventions a linter would usually own: every tracked `.js` and
+`.mjs` file parses, and nothing under `js/` evaluates code it assembled at runtime. It also runs
+the sweep described below, so a leak cannot wait for someone to remember it.
 
 Two things it is deliberately arranged to catch:
 
 - **Docs that have drifted from data.** The record book once announced nine records while listing
   seventeen. The README's counts are now checked against the catalogue and the achievement list.
 - **Answers leaking into the source.** DD-013 hides six flags, so a test decodes each one at run
-  time and asserts the plaintext appears in no shipped file. The suite never writes an answer down,
-  which is why it can ship without becoming the answer key.
+  time and asserts that no served file — the suite's own included — holds a plaintext answer, or
+  more of FLAG-01's four fragments than that file's surface is meant to show. A page cannot list a
+  directory, so that test follows the site's own edges and reads whatever it reaches;
+  `node tests/leak-check.mjs` hunts the same answers over every file git can see, committed or not,
+  which is the rest of the tree. Both of them decode through the one table in
+  `tests/answer-key.js`, so "the same answers" means the same code rather than the same recipe
+  written twice. The suite never writes an answer down, which is why it can ship
+  without becoming the answer key.
 
 ---
 
@@ -99,7 +140,7 @@ catalogue rather than spelling the number out, so it cannot go stale again.
 | AC-01 | Path Found | Clearing Find the Path on standard |
 | AC-02 | Steady Hand | Clearing Find the Path while the menus move |
 | AC-03 | Root Access | Recovering the hidden credential (FLAG-01) |
-| AC-04 | Read the Fine Source | Finding all four fragments before guessing |
+| AC-04 | Read the Fine Source | Holding all four fragments, whether you found them or a hint rung handed them over |
 | AC-05 | Point Collector | Banking 1,000 points in Lazy Drop |
 | AC-06 | Small Print | Raising Lazy Drop to tier 5 |
 | AC-07 | Signed the Guestbook | Leaving a mark in 1999 |
@@ -158,8 +199,10 @@ js/
   ui/
     select.js           ArchiveSelect — upgrades a native <select>
     menu.js             createMenu — the shared listbox / keyboard model
+    scrollbar.js        is a mousedown on the panel's own scrollbar? (both widgets)
+    presses.js          is the pointer pressing inside the panel right now? (both widgets)
     palette.js          the index dialog
-  modes/                one module per wing: mount(root, route, api) / onSub / teardown
+  modes/                one wing each: mount(root, route, api) → cleanup, optional onSub
   games/                find-path, hacker, lazy-drop — mounted by modes/games.js
   lib/store.js          namespaced localStorage helper
 ```
@@ -188,9 +231,16 @@ Three conventions hold the whole thing together:
 - **The markup is the index.** Every exhibit carries `data-exhibit`, `data-accession`,
   `data-title` and `data-route`. The palette, the home page and the deep links all read that one
   source, so nothing can drift out of date.
-- **A mode owns its listeners.** Every `mount()` keeps an `AbortController` in its closure and
-  `teardown()` aborts it, so a wing cannot leave handlers, timers or animation frames behind on a
-  document it no longer owns.
+- **A mode owns its listeners.** A wing removes every handler it binds to `document` or `window`
+  before it leaves, so it cannot leave handlers, timers or animation frames behind on a document it
+  no longer owns. Each wing picks its own mechanism — `js/modes/home.js` keeps an `AbortController`
+  in its closure and aborts it, `js/modes/education.js` and `js/modes/retro.js` collect closures in
+  a `cleanups` array — and every `mount()` hands back one cleanup function, which the router calls
+  before it loads the next wing (`js/core/router.js:15`). One level down, a game returns
+  `{ unmount, onShow, onHide }` and its `unmount()` pairs each `addEventListener` with a
+  `removeEventListener`. Listeners bound to elements the wing built itself are not tracked: they go
+  away with the markup. `js/core/modes.js` documents the same rule for the `api` it hands out —
+  anything listening on the host has to be dropped at teardown.
 - **State is namespaced.** Everything persists through `js/lib/store.js` under
   `dropdown-archive:<key>` — `theme`, `achievements`, `find-path`, `lazy-drop`, `retro-counter`,
   `retro-guestbook`. No key is written directly.
@@ -200,9 +250,20 @@ Three conventions hold the whole thing together:
 Both dropdown implementations (a native `<select>` upgrade and a generic listbox) follow the same
 WAI-ARIA combobox model: `role="combobox"` + `role="listbox"` + `aria-activedescendant`, roving
 type-ahead, `Home`/`End`, `Esc` returning focus to the trigger, and a single `:focus-visible` ring.
-The mega menu collapses to a bottom sheet on narrow screens. Skip link, landmarks, live regions
-for game feedback and `prefers-reduced-motion` are wired throughout; the retro wing stays loud
-without becoming unusable.
+A click anywhere outside an open widget closes it, and a `Tab` out of one closes it without dragging
+focus back to the trigger — a keyboard visitor leaving a listbox mid-page should land on the next
+control, not several controls earlier. So does focus itself moving away, to the index palette or
+anywhere else: both components listen for `focusout` and stay closed, leaving focus where the visitor
+put it. A pick never moves focus by accident: nothing inside an open list takes focus, so
+`mousedown` inside one is cancelled, which keeps the focus on the trigger and the click on its
+option — the panel's own scrollbar excepted, since cancelling it there would stop a thumb from being
+dragged (`js/ui/scrollbar.js`). That spared press is caught rather than trusted: the browser moves
+focus off a control whose list is open for any press inside it, so a widget that can see its own
+press is in progress puts focus back on the trigger instead of reading the move as a departure, which
+is what used to snap the menu shut on top of the thumb (`js/ui/presses.js`). The mega menu collapses
+to a bottom sheet on narrow screens.
+Skip link, landmarks, live regions for game feedback and `prefers-reduced-motion` are wired
+throughout; the retro wing stays loud without becoming unusable.
 
 ---
 
@@ -212,12 +273,15 @@ without becoming unusable.
 data-accession="DD-0XX" data-title="…" data-route="/education/dd-0XX">` in the wing file. It
 appears in the index, the wing navigation and the deep-link router with no further registration.
 
-**Add a game** — export `{ mount(root, route, api), teardown() }` from `js/games/<name>.js`, add a
+**Add a game** — `export default { id, mount(root, api) }` from `js/games/<name>.js`, where `mount`
+returns `{ unmount, onShow?, onHide? }` (or just a cleanup function). `onShow` and `onHide` fire
+when the visitor switches tabs inside the wing, which does not remount the game. Add a
 `data-exhibit="game"` section to `games.html`, and map its sub-route in `js/modes/games.js`.
 
-**Add a wing** — a fragment file, a mode module in `js/modes/`, entries in `WINGS`
-(`js/core/catalogue.js`) and `MODES` (`js/core/modes.js`), and a `body[data-mode="…"]` accent in
-`css/tokens.css`.
+**Add a wing** — a fragment file, a mode module in `js/modes/` exporting
+`mount(root, route, api)` (returning one cleanup function) and optional `onSub(root, route)`,
+entries in `WINGS` (`js/core/catalogue.js`) and `MODES` (`js/core/modes.js`), and a
+`body[data-mode="…"]` accent in `css/tokens.css`.
 
 ---
 
