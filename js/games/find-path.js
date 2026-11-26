@@ -42,8 +42,22 @@ const state = {
 // journey is how far through the ordered shelf the player has got, and
 // completed is every set ever cleared, however it was reached. Both merge over
 // an older save, so neither needs a version bump — and bumping one would wipe
-// everybody's best times.
-let record = loadMerged(STORE_KEY, { standard: null, advanced: null, journey: 0, completed: [] });
+// everybody's best times. localStorage is also the one input a visitor can edit
+// by hand: a null `completed` used to throw on mount, and a string `journey`
+// resolved the journey pick to an undefined set.
+const VALID_SET_IDS = new Set(PATH_SETS.map((set) => set.id));
+
+function readCompleted(stored) {
+	return Array.isArray(stored?.completed) ? stored.completed.filter((id) => VALID_SET_IDS.has(id)) : [];
+}
+
+function readJourney(stored) {
+	const value = Number(stored?.journey);
+	return Number.isInteger(value) && value >= 0 && value <= SET_COUNT ? value : 0;
+}
+
+const saved = loadMerged(STORE_KEY, { standard: null, advanced: null, journey: 0, completed: [] });
+let record = { ...saved, journey: readJourney(saved), completed: readCompleted(saved) };
 
 /**
  * Fill the picker: two ways of letting the archive choose, then every set under

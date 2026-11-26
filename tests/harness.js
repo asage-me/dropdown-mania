@@ -135,7 +135,11 @@ let importSeq = 0;
 /** Import a module afresh, so its module-scope state starts empty. */
 export function freshModule(path) {
 	importSeq += 1;
-	return import(`../${path}?test=${importSeq}`);
+	// A URL object keeps the cache-busted specifier opaque to static graph analysis.
+	// A literal `import(\`../${path}?test=...\`)` instead makes the editor's analyser
+	// assume the harness imports every test case, inventing cycles none of the
+	// modules actually contain. Runtime behaviour is identical.
+	return import(new URL(`../${path}?test=${importSeq}`, import.meta.url).href);
 }
 
 export async function fetchText(path) {

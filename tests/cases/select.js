@@ -30,6 +30,15 @@ async function widget(markup = MARKUP) {
 	};
 }
 
+function scrollableSelect(id) {
+	const node = host(`<div class="wing" tabindex="-1"><select id="${id}"></select></div>`);
+	const select = node.querySelector("select");
+	for (let row = 1; row <= 40; row += 1) {
+		select.append(new Option(`Row ${String(row).padStart(3, "0")}`, String(row)));
+	}
+	return { node, select };
+}
+
 suite("ui/select.js", () => {
 	test("enhanceSelects wraps a native select and marks it so it is never upgraded twice", async () => {
 		const w = await widget();
@@ -269,12 +278,8 @@ suite("ui/select.js", () => {
 	 */
 	test("a scrolling menu survives its own scrollbar and spares nothing else", async () => {
 		const { enhanceSelects, destroySelectsIn, selectTrigger } = await freshModule("js/ui/select.js");
-		const node = host(`<div class="wing" tabindex="-1"><select id="long"></select></div>`);
+		const { node, select } = scrollableSelect("long");
 		try {
-			const select = node.querySelector("select");
-			for (let row = 1; row <= 40; row += 1) {
-				select.append(new Option(`Row ${String(row).padStart(3, "0")}`, String(row)));
-			}
 			enhanceSelects(node);
 			const root = node.querySelector(".sel");
 			const menu = root.querySelector(".sel__menu");
@@ -317,15 +322,11 @@ suite("ui/select.js", () => {
 	 */
 	test("a bar press with no focus target named still moves focus somewhere real", async () => {
 		const { enhanceSelects, destroySelectsIn, selectTrigger } = await freshModule("js/ui/select.js");
-		const node = host(`<div class="wing" tabindex="-1"><select id="bar"></select></div>`);
+		const { node, select } = scrollableSelect("bar");
 		const landed = [];
 		const watch = (event) => landed.push(event.relatedTarget);
 		document.addEventListener("focusout", watch, true);
 		try {
-			const select = node.querySelector("select");
-			for (let row = 1; row <= 40; row += 1) {
-				select.append(new Option(`Row ${String(row).padStart(3, "0")}`, String(row)));
-			}
 			enhanceSelects(node);
 			const root = node.querySelector(".sel");
 			const menu = root.querySelector(".sel__menu");

@@ -17,8 +17,9 @@
 	// entry points with that file present or absent, so its one key moves nothing here. The sweep is
 	// clean now. Its one finding was js/games/hacker.js's resetRunState, a seam only the suite calls:
 	// tests/cases/hacker.js reaches the module through the computed import() in tests/harness.js, which
-	// no static graph can follow, so the export carries an @expected-unused tag that falls stale (and
-	// gets reported) the day a real import appears.
+	// no static graph can follow, so the export carries a scoped `fallow-ignore-next-line unused-export`
+	// there. Unlike @expected-unused, that suppression reads clean in both the Fallow CLI and the
+	// VS Code analyzer.
 	"entry": ["js/main.js", "css/*.css", "tests/harness.js", "tests/cases/*.js"],
 
 	// The wing pages are pulled in at runtime by js/core/templates.js, so they are

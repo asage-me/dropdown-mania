@@ -10,7 +10,9 @@
  * `package.json` saying `"type": "module"`, and Node scopes `"type"` to the folder it
  * lives in (docs: "the nearest parent package.json",
  * nodejs.org/docs/latest-v24.x/api/packages.html), so `tests/*.js` are ES modules while
- * every other directory \1\2 * Before that, this file had to be `.mjs` for Node: a `.js` with no package.json to
+ * every other directory keeps Node's default CommonJS treatment.
+ *
+ * Before that, this file had to be `.mjs` for Node: a `.js` with no package.json to
  * declare its type loads as CommonJS and refuses its own `import`. And a `.mjs` cannot be
  * imported by a browser as this site is served, because `python -m http.server` answers
  * `.mjs` with the platform's registered type, which on Windows is `text/plain`

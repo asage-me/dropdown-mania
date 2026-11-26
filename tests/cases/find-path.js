@@ -7,6 +7,7 @@
  * it read as a verdict on the answer you were about to give.
  */
 
+import { save } from "../../js/lib/store.js";
 import {
 	assert, choose, freshModule, gameModule, mountExhibit, readStore, suite, test, text, tick,
 } from "../harness.js";
@@ -85,6 +86,20 @@ suite("games/find-path.js — the board", () => {
 			assert.eq(g.rows()[0].querySelector("select").value, "", "a row must start unanswered");
 			assert.match(g.rows()[0].querySelector("select").options[0].textContent, /Choose/);
 		} finally { g.destroy(); }
+	});
+
+	test("a malformed saved record mounts a fresh board", async () => {
+		save("find-path", { completed: null, journey: "oops" });
+		const game = await gameModule("find-path");
+		const g = await path(null, game);
+		try {
+			assert.eq(text(g.root, "[data-fp-sets]"), "0 of 50");
+			choose(g.setSelect, "journey");
+			await tick(40);
+			assert.includes(g.status(), g.sets.PATH_SETS[0].name, "a bad journey number did not reset to the first set");
+		} finally {
+			g.destroy();
+		}
 	});
 
 	test("the set picker offers random, the journey, and all fifty sets", async () => {
